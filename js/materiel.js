@@ -2,7 +2,7 @@ import { supabase } from "./supabase.js";
 import { insertarMaterial } from "./insertarMaterial.js";
 import {enregistrerMouvementStock} from "./mouvementStock.js";
 
-const nomTable = "material_general";
+const nomTable = "materiel";
 const fenetreAjout = document.querySelector("#fenetre-ajout-mat");
 const fenetreModification = document.querySelector("#fenetre-modification-mat");
 const boutonFrom = document.querySelector("#bouton-mat");
