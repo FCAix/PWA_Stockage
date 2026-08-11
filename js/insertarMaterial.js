@@ -31,9 +31,6 @@ export async function insertarMaterial(table, donnee) {
     // The movement trigger will update this quantity.
     cantidad: 0,
 
-    stock_minimo:
-      Number(donnee.stockMinim ?? 0),
-
     ubicacion:
       donnee.lieu?.trim() || null,
 
