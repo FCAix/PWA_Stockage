@@ -26,7 +26,7 @@ export async function insertarMaterial(table, donnee) {
   }
 
   const materiel = {
-    nombre: donnee.nom.trim(),
+    nom: donnee.nom.trim(),
 
     // The movement trigger will update this quantity.
     cantidad: 0,
