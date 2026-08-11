@@ -37,7 +37,7 @@ export async function insertarMaterial(table, donnee) {
     ubicacion:
       donnee.lieu?.trim() || null,
 
-    estado:
+    etat:
       donnee.etat || "disponible"
   };
 
