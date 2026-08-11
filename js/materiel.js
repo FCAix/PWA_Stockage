@@ -161,7 +161,7 @@ async function afficherMateriel() {
       const nomMateriel =
         document.createElement("h2");
 
-      nomMateriel.textContent = materiel.nombre;
+      nomMateriel.textContent = materiel.nom;
 
       const quantiteMateriel =
         document.createElement("p");
@@ -276,7 +276,7 @@ async function ouvrirModification(
       );
 
     identifiantModification.value = materiel.id;
-    nomModification.value = materiel.nombre;
+    nomModification.value = materiel.nom;
     quantiteModification.value = materiel.cantidad;
     lieuModification.value =
       materiel.ubicacion || "";
@@ -315,7 +315,7 @@ async function sauvegarderModification(event) {
     }
 
     const informationsModifiees = {
-        nombre: nomModification.value.trim(),
+        nom: nomModification.value.trim(),
         ubicacion:
         lieuModification.value.trim() || null,
         etat: etatModification.value
