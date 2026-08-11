@@ -1,10 +1,6 @@
 create table public.materiel (
   id uuid not null default gen_random_uuid (),
-  immatriculation text not null,
   nom text null,
-  marque text null,
-  modele text null,
-  capacite integer not null default 9,
   lieu text null,
   etat text not null default 'disponible'::text,
   notes text null,

@@ -179,7 +179,7 @@ async function afficherMateriel() {
         document.createElement("p");
 
       etatMateriel.textContent =
-        `État : ${materiel.estado}`;
+        `État : ${materiel.etat}`;
 
       const boutonModifier =
         document.createElement("button");
@@ -280,7 +280,7 @@ async function ouvrirModification(
     quantiteModification.value = materiel.cantidad;
     lieuModification.value =
       materiel.ubicacion || "";
-    etatModification.value = materiel.estado;
+    etatModification.value = materiel.etat;
 
     fenetreModification.showModal();
     nomModification.focus();
@@ -318,7 +318,7 @@ async function sauvegarderModification(event) {
         nombre: nomModification.value.trim(),
         ubicacion:
         lieuModification.value.trim() || null,
-        estado: etatModification.value
+        etat: etatModification.value
     };
 
     try {
