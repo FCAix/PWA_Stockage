@@ -3,6 +3,7 @@ import { supabase } from "./supabase.js";
 const champsIdentifiantMateriel = {
   material_bodega: "material_bodega_id",
   material_general: "material_general_id",
+  materiel:"materiel_id",
   tonnelles: "tonnelle_id"
 };
 
