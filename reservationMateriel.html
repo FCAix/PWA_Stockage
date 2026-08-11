@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta name="theme-color" content="#ffffff">
+
+  <link
+    rel="manifest"
+    href="./manifest.webmanifest"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./styles.css"
+  >
+  <script type="module" src="./js/navigation.js"></script>
+  <title>Réserver matériel</title>
+</head>
+
+<body>
+  <header class="entete-page">
+    <h1>Réserver matériel</h1>
+
+    <nav>
+      <a href="./accueil.html">
+        Accueil
+      </a>
+
+      <a href="./agenda.html">
+        Voir les réservations
+      </a>
+    </nav>
+  </header>
+
+  <main class="page-reservations">
+
+    <form
+      id="form-reservation-materiel"
+      class="formulaire-reservation"
+    >
+      <label for="selection-materiel-reservation">
+        Materiel
+      </label>
+
+      <select
+        id="selection-materiel-reservation"
+        required
+      >
+        <option value="">
+          Sélectionner  materiel
+        </option>
+      </select>
+
+      <label for="nom-reservation">
+        Nom de la réservation
+      </label>
+
+      <input
+        id="nom-reservation"
+        type="text"
+        required
+      >
+
+      <label for="responsable-reservation">
+        Responsable
+      </label>
+
+      <input
+        id="responsable-reservation"
+        type="text"
+        required
+      >
+
+      <label for="telephone-reservation">
+        Téléphone
+      </label>
+
+      <input
+        id="telephone-reservation"
+        type="tel"
+        required
+      >
+
+      <label for="date-debut-reservation">
+        Date et heure de départ
+        </label>
+
+        <input
+        id="date-debut-reservation"
+        type="datetime-local"
+        required
+        >
+
+        <label for="date-fin-reservation">
+        Date et heure de retour
+        </label>
+
+        
+
+        <input
+        id="date-fin-reservation"
+        type="datetime-local"
+        required
+        >
+
+        
+      <label for="destination-reservation">
+        Destination
+        </label>
+
+        <input
+        id="destination-reservation"
+        type="text"
+        >
+        <label class="option-repetition">
+        <input
+            id="reservation-repetitive"
+            type="checkbox"
+        >
+            Répéter cette réservation chaque semaine
+        </label>
+
+        <div id="options-repetition" hidden>
+        <label for="date-fin-repetition">
+            Répéter jusqu'au
+        </label>
+
+        <input
+            id="date-fin-repetition"
+            type="date"
+        >
+
+        <p id="resume-repetition"></p>
+        </div>
+
+      <label for="notes-reservation">
+        Notes
+      </label>
+
+      <textarea
+        id="notes-reservation"
+        rows="4"
+      ></textarea>
+
+      <button
+        id="bouton-enregistrer-reservation"
+        type="submit"
+      >
+        Enregistrer la réservation
+      </button>
+    
+  </main>
+
+  <script
+    type="module"
+    src="./js/reservationMateriel.js"
+  ></script>
+</body>
+
+</html>
