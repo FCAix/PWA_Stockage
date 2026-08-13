@@ -1,31 +1,26 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <title>Créer un compte</title>
 
     <link rel="stylesheet" href="./styles.css">
 
-    <title>Connexion</title>
-
     <script
         type="module"
-        src="./js/login.js"
-    ></script>
+        src="./js/register.js">
+    </script>
 </head>
 
 <body>
 
     <main class="login-container">
 
-        <h1>Connexion</h1>
+        <h1>Créer un compte</h1>
 
-        <form id="login-form">
+        <form id="register-form">
 
             <label for="email">
                 Adresse e-mail
@@ -44,26 +39,34 @@
             <input
                 id="password"
                 type="password"
+                minlength="6"
+                required
+            >
+
+            <label for="password-confirm">
+                Confirmer le mot de passe
+            </label>
+
+            <input
+                id="password-confirm"
+                type="password"
+                minlength="6"
                 required
             >
 
             <button type="submit">
-                Se connecter
+                Créer mon compte
             </button>
 
-            <p>
-                Pas encore de compte ?
-                <a href="./register.html">
-                    Créer un compte
-                </a>
-            </p>
-
-            <p id="login-error"></p>
+            <p id="register-message"></p>
 
         </form>
+
+        <a href="./login.html">
+            J'ai déjà un compte
+        </a>
 
     </main>
 
 </body>
-
 </html>
