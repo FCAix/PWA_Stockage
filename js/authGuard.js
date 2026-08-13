@@ -37,7 +37,7 @@ export async function requireAuth(allowedRoles = []) {
 
         if (profile.role === "client") {
 
-            window.location.replace("./client.html");
+            window.location.replace("./accueil.html");
 
         } else {
 
