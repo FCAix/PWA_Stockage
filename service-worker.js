@@ -1,4 +1,4 @@
-const CACHE_NAME = "pwa-stockage-v16";
+const CACHE_NAME = "pwa-stockage-v16.1";
 
 const FILES_TO_CACHE = [
   "./",
@@ -17,6 +17,8 @@ const FILES_TO_CACHE = [
   "./reservationMinibus.html",
   "./reservationMateriel.html",
   "./agendaminibus.html",
+  "./adminReservationsMateriel.html",
+  "./mesDemandesMateriel.html",
   "./styles.css",
   "./manifest.webmanifest",
   "./js/app.js",
@@ -39,6 +41,8 @@ const FILES_TO_CACHE = [
   "./js/reservationMinibus.js",
   "./js/agendaMinibus.js",
   "./js/reservationMateriel.js",
+  "./js/mesDemandesMateriel.js",
+  "./js/demandesAdmin.js",
   "./icons/icon-192.svg",
   "./icons/icon-512.svg",
   "./icons/navigation/bodega.svg",
