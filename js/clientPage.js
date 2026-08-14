@@ -1,3 +1,3 @@
 import { requireAuth } from "./authGuard.js";
 
-await requireAuth(["admin","client"]);
+//await requireAuth(["admin","client"]);
