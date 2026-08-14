@@ -46,11 +46,6 @@ const destinationReservation =
     "#destination-reservation"
   );
 
-const nombrePassagersReservation =
-  document.querySelector(
-    "#nombre-passagers-reservation"
-  );
-
   const reservationRepetitive =
   document.querySelector(
     "#reservation-repetitive"
@@ -186,14 +181,7 @@ async function remplirSelectionMateriel() {
 
       option.value = materiel.id;
 
-      option.textContent =
-        materiel.immatriculation +
-        (
-          materiel.nom
-            ? ` — ${materiel.nom}`
-            : ""
-        );
-
+      option.textContent =materiel.nom;
       selectionMateriel.appendChild(option);
     });
   } catch (error) {
@@ -246,38 +234,41 @@ async function enregistrerReservation(event) {
 
   boutonEnregistrerReservation.disabled = true;
   afficherMessageReservation("");
+  const {
+      data: { user },
+      error: userError
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+      window.location.href = "./login.html";
+      return;
+  }
 
   try {
     verifierDatesReservation();
 
     const informationsReservation = {
-      materiel_id:
-        selectionMateriel.value,
+    materiel_id: selectionMateriel.value,
 
-      nom_reservation:
+    demandeur_id: user.id,
+
+    nom_reservation:
         nomReservation.value.trim(),
 
-      responsable:
+    responsable:
         responsableReservation.value.trim(),
 
-      telephone:
-        telephoneReservation.value.trim() ||
-        null,
+    telephone:
+        telephoneReservation.value.trim() || null,
 
-      destination:
-        destinationReservation.value.trim() ||
-        null,
+    destination:
+        destinationReservation.value.trim() || null,
 
-      nombre_passagers: Number(
-        nombrePassagersReservation.value
-      ),
+    statut: "attente",
 
-      statut: "attente",
-
-      notes:
-        notesReservation.value.trim() ||
-        null
-    };
+    notes:
+        notesReservation.value.trim() || null
+};
 
     const reservations =
       creerReservationsRepetitives(
@@ -321,8 +312,8 @@ async function enregistrerReservation(event) {
 
     afficherMessageReservation(
       reservations.length === 1
-        ? "Réservation enregistrée correctement."
-        : `${reservations.length} réservations enregistrées correctement.`
+        ? "Votre demande de réservation a été envoyée et attend la validation d'un administrateur."
+        : `${reservations.length} demandes ont été envoyées.`
     );
   } catch (error) {
     console.error(

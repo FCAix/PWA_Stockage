@@ -16,10 +16,10 @@ async function recupererMouvements() {
       destino,
       fecha_movimiento,
       material_bodega (
-        nombre
+        nom
       ),
       material_general (
-        nombre
+        nom
       ),
       tonnelles (
         nombre
@@ -38,8 +38,8 @@ async function recupererMouvements() {
 
 function obtenirNomMateriel(mouvement) {
   return (
-    mouvement.material_bodega?.nombre ||
-    mouvement.material_general?.nombre ||
+    mouvement.material_bodega?.nom ||
+    mouvement.material_general?.nom ||
     mouvement.tonnelles?.nombre ||
     "Matériel inconnu"
   );
