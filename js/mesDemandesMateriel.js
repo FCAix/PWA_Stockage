@@ -6,7 +6,7 @@ import { requireAuth } from "./authGuard.js";
 // AUTHENTIFICATION
 // ======================================================
 
-const auth = await requireAuth(["client"]);
+const auth = await requireAuth(["admin","client"]);
 
 if (!auth) {
     throw new Error("Utilisateur non autorisé");
