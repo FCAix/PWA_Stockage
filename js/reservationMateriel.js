@@ -158,7 +158,7 @@ async function recupererMateriel() {
     .from("materiel")
     .select(`
       id,
-      nom,
+      nom
     `)
     .eq("etat", "disponible")
     .order("nom", {
