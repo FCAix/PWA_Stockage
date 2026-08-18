@@ -491,8 +491,10 @@ async function chargerDemandes() {
             motif_refus,
             created_at,
             confirmee_par,
+            confirmee_par_nom,
             confirmee_at,
             retour_confirme_par,
+            retour_confirme_par_nom,
             retour_confirme_at
         `)
         .order(
@@ -544,14 +546,31 @@ async function confirmerReservation(
         return;
     }
 
+    const { data: adminProfile, error: profileError } =
+        await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", admin.id)
+            .single();
+
+    if (profileError) {
+        console.error(
+            "Impossible de récupérer le profil admin :",
+            profileError
+        );
+
+        return;
+    }
 
     const { error } = await supabase
         .from("reservations_materiel")
         .update({
             statut: "confirme",
 
-            confirmee_par:
-                admin.id,
+            confirmee_par: admin.id,
+
+            confirmee_par_nom:
+                adminProfile.full_name,
 
             confirmee_at:
                 new Date().toISOString()
@@ -564,6 +583,7 @@ async function confirmerReservation(
             "statut",
             "attente"
         );
+
 
 
     if (error) {
@@ -595,13 +615,14 @@ async function confirmerReservation(
         data: googleData,
         error: googleError
     } = await supabase.functions.invoke(
-        "google-calendar",
-        {
-            body: {
-                reservationId: reservationId
+            "google-calendar",
+            {
+                body: {
+                    reservationId,
+                    action: "create"
+                }
             }
-        }
-    );
+        );
 
     if (googleError) {
 
@@ -725,6 +746,9 @@ async function confirmerRetour(
             retour_confirme_par:
                 admin.id,
 
+            retour_confirme_par_nom:
+                adminProfile.full_name,
+
             retour_confirme_at:
                 new Date().toISOString()
         })
@@ -737,6 +761,25 @@ async function confirmerRetour(
             "confirme"
         );
 
+    const {
+            error: googleError
+        } = await supabase.functions.invoke(
+            "google-calendar",
+            {
+                body: {
+                    reservationId,
+                    action: "update"
+                }
+            }
+        );
+
+        if (googleError) {
+
+            console.error(
+                "Erreur Google Agenda :",
+                googleError
+            );
+        }
 
     if (error) {
 

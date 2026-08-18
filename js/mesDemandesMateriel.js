@@ -250,6 +250,32 @@ function creerCarteDemande(
         article.appendChild(notes);
     }
 
+    if (reservation.confirmee_par_nom) {
+
+    const confirmationInfo =
+            document.createElement("p");
+
+        confirmationInfo.textContent =
+            `Confirmée par : ${reservation.confirmee_par_nom} le ${formatDate(reservation.confirmee_at)}`;
+
+        article.appendChild(
+            confirmationInfo
+        );
+    }
+
+    if (reservation.retour_confirme_par_nom) {
+
+    const returnInfo =
+            document.createElement("p");
+
+        returnInfo.textContent =
+            `Retour confirmé par : ${reservation.retour_confirme_par_nom} le ${formatDate(reservation.retour_confirme_at)}`;
+
+        article.appendChild(
+            returnInfo
+        );
+    }
+
 
     return article;
 }
