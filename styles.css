@@ -666,3 +666,427 @@ tbody tr:hover {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* =========================================================
+   DEMANDES / RÉSERVATIONS MATÉRIEL
+   mesDemandesMateriel.html
+   adminReservationsMateriel.html
+   ========================================================= */
+
+
+/* =========================
+   PAGE
+   ========================= */
+
+.page-reservations {
+    width: min(1200px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 30px 0 100px;
+}
+
+.page-reservations h1 {
+    margin: 0 0 30px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.page-reservations section {
+    margin-bottom: 35px;
+}
+
+.page-reservations section > h2 {
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+
+    font-size: 1.25rem;
+
+    border-bottom: 2px solid #e5e7eb;
+}
+
+
+/* =========================
+   CONTENEURS
+   ========================= */
+
+#demandes-attente,
+#demandes-confirmees,
+#reservations-confirmees,
+#retours-attente,
+#historique-demandes,
+#historique {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(280px, 1fr)
+        );
+
+    gap: 18px;
+
+    min-height: 40px;
+}
+
+
+/* =========================
+   CARTE DEMANDE
+   ========================= */
+
+.carte-demande {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    position: relative;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    box-shadow:
+        0 3px 12px
+        rgba(0, 0, 0, 0.08);
+
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.carte-demande:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 7px 20px
+        rgba(0, 0, 0, 0.12);
+}
+
+.carte-demande h3 {
+    margin: 0 0 5px;
+
+    font-size: 1.15rem;
+    font-weight: 700;
+
+    color: #111827;
+}
+
+.carte-demande p {
+    margin: 0;
+
+    font-size: 0.95rem;
+    line-height: 1.45;
+
+    color: #4b5563;
+}
+
+
+/* =========================
+   STATUT
+   ========================= */
+
+.statut-demande {
+    align-self: flex-start;
+
+    margin-top: 8px !important;
+
+    padding: 6px 11px;
+
+    border-radius: 999px;
+
+    font-size: 0.82rem !important;
+    font-weight: 700;
+}
+
+
+/* EN ATTENTE */
+
+.statut-attente {
+    color: #92400e;
+    background: #fef3c7;
+}
+
+
+/* CONFIRMÉ */
+
+.statut-confirme {
+    color: #166534;
+    background: #dcfce7;
+}
+
+
+/* REFUSÉ */
+
+.statut-refusee {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+
+/* TERMINÉ */
+
+.statut-termine {
+    color: #1e40af;
+    background: #dbeafe;
+}
+
+
+/* ANNULÉ */
+
+.statut-annulee {
+    color: #374151;
+    background: #e5e7eb;
+}
+
+
+/* =========================
+   RETOUR EN ATTENTE
+   ========================= */
+
+.retour-en-attente {
+    margin-top: 8px !important;
+
+    padding: 10px 12px;
+
+    color: #92400e !important;
+    background: #fffbeb;
+
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+
+    font-weight: 600;
+}
+
+
+/* =========================
+   ACTIONS ADMIN
+   ========================= */
+
+.actions-demande {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+
+    margin-top: auto;
+    padding-top: 12px;
+}
+
+
+/* =========================
+   BOUTONS
+   ========================= */
+
+.bouton-action {
+    min-height: 42px;
+
+    padding: 9px 15px;
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.1s ease,
+        opacity 0.1s ease,
+        background 0.15s ease;
+}
+
+.bouton-action:hover {
+    transform: translateY(-1px);
+}
+
+.bouton-action:active {
+    transform: translateY(0);
+}
+
+.bouton-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* CONFIRMER */
+
+.bouton-confirmer {
+    color: #ffffff;
+    background: #16a34a;
+}
+
+.bouton-confirmer:hover {
+    background: #15803d;
+}
+
+
+/* REFUSER */
+
+.bouton-refuser {
+    color: #ffffff;
+    background: #dc2626;
+}
+
+.bouton-refuser:hover {
+    background: #b91c1c;
+}
+
+
+/* RETOUR */
+
+.bouton-retour {
+    margin-top: 12px;
+
+    color: #ffffff;
+    background: #2563eb;
+}
+
+.bouton-retour:hover {
+    background: #1d4ed8;
+}
+
+
+/* =========================
+   SECTIONS ADMIN
+   ========================= */
+
+#demandes-attente {
+    padding-left: 12px;
+    border-left: 4px solid #f59e0b;
+}
+
+#reservations-confirmees,
+#demandes-confirmees {
+    padding-left: 12px;
+    border-left: 4px solid #22c55e;
+}
+
+#retours-attente {
+    padding-left: 12px;
+    border-left: 4px solid #3b82f6;
+}
+
+#historique,
+#historique-demandes {
+    padding-left: 12px;
+    border-left: 4px solid #9ca3af;
+}
+
+
+/* =========================
+   MESSAGE VIDE
+   ========================= */
+
+#demandes-attente:empty::after,
+#demandes-confirmees:empty::after,
+#reservations-confirmees:empty::after,
+#retours-attente:empty::after,
+#historique-demandes:empty::after,
+#historique:empty::after {
+    content: "Aucun élément à afficher.";
+
+    padding: 20px;
+
+    color: #6b7280;
+
+    background: #f9fafb;
+
+    border: 1px dashed #d1d5db;
+    border-radius: 10px;
+
+    text-align: center;
+}
+
+
+/* =========================
+   MOBILE
+   ========================= */
+
+@media (max-width: 700px) {
+
+    .page-reservations {
+        width: calc(100% - 20px);
+
+        padding-top: 20px;
+        padding-bottom: 90px;
+    }
+
+
+    .page-reservations h1 {
+        font-size: 1.55rem;
+        margin-bottom: 25px;
+    }
+
+
+    .page-reservations section > h2 {
+        font-size: 1.1rem;
+    }
+
+
+    #demandes-attente,
+    #demandes-confirmees,
+    #reservations-confirmees,
+    #retours-attente,
+    #historique-demandes,
+    #historique {
+        grid-template-columns: 1fr;
+
+        gap: 13px;
+
+        padding-left: 8px;
+    }
+
+
+    .carte-demande {
+        padding: 15px;
+
+        border-radius: 11px;
+    }
+
+
+    .carte-demande:hover {
+        transform: none;
+    }
+
+
+    .actions-demande {
+        flex-direction: column;
+    }
+
+
+    .bouton-action {
+        width: 100%;
+        min-height: 46px;
+
+        font-size: 1rem;
+    }
+}
+
+
+/* =========================
+   TRÈS PETITS ÉCRANS
+   ========================= */
+
+@media (max-width: 400px) {
+
+    .page-reservations {
+        width: calc(100% - 14px);
+    }
+
+
+    .carte-demande {
+        padding: 13px;
+    }
+
+
+    .carte-demande h3 {
+        font-size: 1.05rem;
+    }
+
+
+    .carte-demande p {
+        font-size: 0.9rem;
+    }
+}
