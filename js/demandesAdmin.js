@@ -591,6 +591,37 @@ async function confirmerReservation(
 
         return;
     }
+    const {
+        data: googleData,
+        error: googleError
+    } = await supabase.functions.invoke(
+        "google-calendar",
+        {
+            body: {
+                reservationId: reservationId
+            }
+        }
+    );
+
+    if (googleError) {
+
+        console.error(
+            "Erreur Google Agenda :",
+            googleError
+        );
+
+        alert(
+            "La réservation est confirmée, mais l'ajout à Google Agenda a échoué."
+        );
+
+    } else {
+
+        console.log(
+            "Événement Google Agenda créé :",
+            googleData
+        );
+    }
+
 
 
     await chargerDemandes();
