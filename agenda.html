@@ -2,112 +2,153 @@
 <html lang="fr">
 
 <head>
-  <meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <meta name="theme-color" content="#ffffff">
+    <meta
+        name="theme-color"
+        content="#ffffff"
+    >
 
-  <link
-    rel="manifest"
-    href="./manifest.webmanifest"
-  >
+    <link
+        rel="manifest"
+        href="./manifest.webmanifest"
+    >
 
-  <link
-    rel="stylesheet"
-    href="./styles.css"
-  >
+    <link
+        rel="stylesheet"
+        href="./styles.css"
+    >
 
-  <title>Agenda des tonnelles</title>
+    <script
+        type="module"
+        src="./js/navigation.js"
+    ></script>
+
+    <title>Agenda du matériel</title>
 </head>
 
 <body>
-  <header class="entete-page">
-    <h1>Agenda des tonnelles</h1>
 
-    <nav>
-      <a href="./index.html">
-        Accueil
-      </a>
+    <header class="entete-page">
 
-      <a href="./reservationMateriel.html">
-        Nouvelle réservation
-      </a>
-    </nav>
-  </header>
+        <h1>Agenda du matériel</h1>
 
-  <main class="page-reservations">
-    <label for="selection-agenda">
-      Sélectionnez materiel
-    </label>
+        <nav>
 
-    <select id="selection-agenda">
-      <option value="">
-        Sélectionner materiel
-      </option>
-    </select>
+            <a href="./accueil.html">
+                Accueil
+            </a>
 
-    <p
-      id="message-agenda"
-      role="status"
-    ></p>
+            <a href="./reservationMateriel.html">
+                Nouvelle demande
+            </a>
 
-    <section
-      id="agenda"
-      class="agenda-tonnelle"
-      hidden
-    >
-      <div class="navigation-agenda">
-        <button
-          id="bouton-mois-precedent"
-          type="button"
-          aria-label="Mois précédent"
+        </nav>
+
+    </header>
+
+
+    <main class="page-reservations">
+
+        <label for="selection-materiel-agenda">
+            Sélectionnez un matériel
+        </label>
+
+        <select id="selection-materiel-agenda">
+
+            <option value="">
+                Sélectionner un matériel
+            </option>
+
+        </select>
+
+
+        <p
+            id="message-agenda"
+            role="status"
+        ></p>
+
+
+        <!--
+            On garde aussi agenda-minibus afin de
+            réutiliser le CSS existant.
+        -->
+
+        <section
+            id="agenda-materiel"
+            class="agenda-minibus agenda-materiel"
+            hidden
         >
-          ←
-        </button>
 
-        <h2 id="titre-mois-agenda"></h2>
+            <div class="navigation-agenda">
 
-        <button
-          id="bouton-mois-suivant"
-          type="button"
-          aria-label="Mois suivant"
-        >
-          →
-        </button>
-      </div>
+                <button
+                    id="bouton-mois-precedent"
+                    type="button"
+                    aria-label="Mois précédent"
+                >
+                    ←
+                </button>
 
-      <div class="entete-grille-agenda">
-        <span>Lun</span>
-        <span>Mar</span>
-        <span>Mer</span>
-        <span>Jeu</span>
-        <span>Ven</span>
-        <span>Sam</span>
-        <span>Dim</span>
-      </div>
+                <h2 id="titre-mois-agenda"></h2>
 
-      <div
-        id="grille-agenda"
-        class="grille-agenda"
-      ></div>
+                <button
+                    id="bouton-mois-suivant"
+                    type="button"
+                    aria-label="Mois suivant"
+                >
+                    →
+                </button>
 
-      <section class="details-reservations">
-        <h2>Réservations du mois</h2>
+            </div>
 
-        <div id="liste-reservations-agenda"></div>
-      </section>
-    </section>
-  </main>
 
-  <script
-    type="module"
-    src="./js/agenda.js"
-  ></script>
-  <script type="module" src="./js/navigation.js"></script>
+            <div class="entete-grille-agenda">
+
+                <span>Lun</span>
+                <span>Mar</span>
+                <span>Mer</span>
+                <span>Jeu</span>
+                <span>Ven</span>
+                <span>Sam</span>
+                <span>Dim</span>
+
+            </div>
+
+
+            <div
+                id="grille-agenda"
+                class="grille-agenda"
+            ></div>
+
+
+            <section class="details-reservations">
+
+                <h2>
+                    Réservations du mois
+                </h2>
+
+                <div
+                    id="liste-reservations-agenda"
+                ></div>
+
+            </section>
+
+        </section>
+
+    </main>
+
+
+    <script
+        type="module"
+        src="./js/agendaMateriel.js"
+    ></script>
+
 </body>
 
 </html>
