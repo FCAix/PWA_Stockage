@@ -352,7 +352,7 @@ async function afficherMateriel() {
                     );
 
                 etat.textContent =
-                    `État : ${materiel.estado}`;
+                    `État : ${materiel.etat}`;
 
 
                 // MODIFIER
@@ -521,7 +521,7 @@ async function ouvrirModification(
             materiel.id;
 
         nomModification.value =
-            materiel.nombre;
+            materiel.nom;
 
         quantiteModification.value =
             materiel.cantidad;
@@ -531,7 +531,7 @@ async function ouvrirModification(
             "";
 
         etatModification.value =
-            materiel.estado;
+            materiel.etat;
 
 
         fenetreModification.showModal();
@@ -618,7 +618,7 @@ async function sauvegarderModification(
                     .trim() ||
                 null,
 
-            estado:
+            etat:
                 etatModification
                     .value
         };
