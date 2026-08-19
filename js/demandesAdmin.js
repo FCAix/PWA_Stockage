@@ -848,33 +848,55 @@ async function synchroniserGoogle(
     const {
         data,
         error
-    } =
-        await supabase
-            .functions
-            .invoke(
-                "google-calendar",
-                {
-                    body: {
-
-                        reservationId,
-
-                        reservationType,
-
-                        action
-                    }
+    } = await supabase
+        .functions
+        .invoke(
+            "google-calendar",
+            {
+                body: {
+                    reservationId,
+                    reservationType,
+                    action
                 }
-            );
+            }
+        );
 
 
     if (error) {
+
+        let details = null;
+
+        try {
+
+            if (error.context) {
+                details =
+                    await error.context.json();
+            }
+
+        } catch (contextError) {
+
+            console.error(
+                "Impossible de lire le détail de l'erreur :",
+                contextError
+            );
+        }
+
 
         console.error(
             "Google Calendar :",
             error
         );
 
+        console.error(
+            "Détail Edge Function :",
+            details
+        );
+
+
         alert(
-            "La réservation a été enregistrée mais la synchronisation Google Agenda a échoué."
+            details?.error
+                ?? error.message
+                ?? "Erreur Google Agenda"
         );
 
         return;
@@ -885,8 +907,7 @@ async function synchroniserGoogle(
         "Google Calendar :",
         data
     );
-}
-
+};
 
 // ======================================================
 // EVENTS
