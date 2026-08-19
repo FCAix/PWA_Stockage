@@ -77,7 +77,7 @@ async function ajouterTonnelle(event) {
 
   try {
     await insertarMaterial("tonnelles", {
-      nombre: document
+      nom: document
         .querySelector("#nom-tonnelle")
         .value,
 
