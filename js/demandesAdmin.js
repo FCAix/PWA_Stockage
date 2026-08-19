@@ -1,342 +1,428 @@
 import { supabase } from "./supabase.js";
 import { requireAuth } from "./authGuard.js";
 
+import {
+    obtenirConfigurationReservation,
+    obtenirTypesReservation
+} from "./reservationsConfig.js";
 
-// ======================================================
-// AUTHENTIFICATION ADMIN
-// ======================================================
 
-const auth = await requireAuth(["admin"]);
+const auth =
+    await requireAuth([
+        "admin"
+    ]);
 
 if (!auth) {
-    throw new Error("Accès administrateur requis");
+    throw new Error(
+        "Accès administrateur requis"
+    );
 }
 
-const admin = auth.user;
+
+const admin =
+    auth.user;
 
 
 // ======================================================
-// ÉLÉMENTS HTML
+// ADMIN
 // ======================================================
 
-const conteneurAttente =
-    document.querySelector("#demandes-attente");
+const {
+    data: profilAdmin
+} = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq(
+        "id",
+        admin.id
+    )
+    .maybeSingle();
 
-const conteneurConfirmees =
-    document.querySelector("#reservations-confirmees");
 
-const conteneurRetours =
-    document.querySelector("#retours-attente");
-
-const conteneurHistorique =
-    document.querySelector("#historique");
+const nomAdmin =
+    profilAdmin?.full_name ||
+    admin.email ||
+    "Administrateur";
 
 
 // ======================================================
-// FORMATAGE
+// HTML
 // ======================================================
 
-function formaterDate(date) {
+const attente =
+    document.querySelector(
+        "#demandes-attente"
+    );
 
-    if (!date) {
-        return "Non renseignée";
+const confirmees =
+    document.querySelector(
+        "#reservations-confirmees"
+    );
+
+const retours =
+    document.querySelector(
+        "#retours-attente"
+    );
+
+const historique =
+    document.querySelector(
+        "#historique"
+    );
+
+
+// ======================================================
+// CHARGEMENT
+// ======================================================
+
+async function chargerReservationsType(
+    configuration
+) {
+
+    const {
+        data,
+        error
+    } = await supabase
+        .from(
+            configuration
+                .tableReservations
+        )
+        .select("*");
+
+
+    if (error) {
+        throw error;
     }
 
-    return new Intl.DateTimeFormat(
-        "fr-FR",
-        {
-            dateStyle: "medium",
-            timeStyle: "short"
-        }
-    ).format(new Date(date));
-}
-
-
-function obtenirLibelleStatut(statut) {
-
-    const statuts = {
-        attente: "En attente",
-        confirme: "Confirmée",
-        refusee: "Refusée",
-        annulee: "Annulée",
-        termine: "Terminée"
-    };
-
-    return statuts[statut] ?? statut;
-}
-
-
-// ======================================================
-// CHARGEMENT DU MATÉRIEL
-// ======================================================
-
-async function chargerMateriels(demandes) {
 
     const ids = [
         ...new Set(
-            demandes
-                .map(demande => demande.materiel_id)
+            data
+                .map(
+                    reservation =>
+                        reservation[
+                            configuration
+                                .colonneRessource
+                        ]
+                )
                 .filter(Boolean)
         )
     ];
 
 
-    if (ids.length === 0) {
-        return new Map();
+    let ressources =
+        new Map();
+
+
+    if (ids.length) {
+
+        const {
+            data: liste
+        } = await supabase
+            .from(
+                configuration
+                    .tableRessources
+            )
+            .select(
+                configuration
+                    .colonnesRessource
+            )
+            .in(
+                "id",
+                ids
+            );
+
+
+        if (liste) {
+
+            ressources =
+                new Map(
+                    liste.map(
+                        ressource => [
+                            ressource.id,
+
+                            configuration
+                                .obtenirLibelleRessource(
+                                    ressource
+                                )
+                        ]
+                    )
+                );
+        }
     }
 
 
-    const { data, error } = await supabase
-        .from("materiel")
-        .select("id, nom")
-        .in("id", ids);
+    return data.map(
+        reservation => ({
+
+            ...reservation,
+
+            _type:
+                configuration.cle,
+
+            _typeLibelle:
+                configuration
+                    .libelle,
+
+            _modeDate:
+                configuration
+                    .modeDate,
+
+            _ressource:
+                ressources.get(
+                    reservation[
+                        configuration
+                            .colonneRessource
+                    ]
+                ) ??
+                "Élément inconnu"
+        })
+    );
+}
 
 
-    if (error) {
+async function chargerDemandes() {
 
-        console.error(
-            "Erreur chargement matériel :",
-            error
+    try {
+
+        const groupes =
+            await Promise.all(
+                obtenirTypesReservation()
+                    .map(
+                        configuration =>
+                            chargerReservationsType(
+                                configuration
+                            )
+                    )
+            );
+
+
+        const demandes =
+            groupes
+                .flat()
+                .sort(
+                    (a, b) =>
+                        new Date(
+                            b.created_at ??
+                            b.date_debut
+                        ) -
+                        new Date(
+                            a.created_at ??
+                            a.date_debut
+                        )
+                );
+
+
+        afficherDemandes(
+            demandes
         );
 
-        return new Map();
+
+    } catch (error) {
+
+        console.error(error);
+
+        attente.textContent =
+            "Impossible de charger les demandes.";
     }
-
-
-    return new Map(
-        data.map(materiel => [
-            materiel.id,
-            materiel.nom
-        ])
-    );
 }
 
 
 // ======================================================
-// CRÉATION DES BOUTONS
+// CARTE
 // ======================================================
 
-function creerBouton(
-    texte,
-    action,
-    reservationId
-) {
-
-    const bouton =
-        document.createElement("button");
-
-    bouton.type = "button";
-
-    bouton.textContent = texte;
-
-    bouton.dataset.action = action;
-    bouton.dataset.id = reservationId;
-
-    bouton.classList.add(
-        "bouton-action",
-        `bouton-${action}`
-    );
-
-    return bouton;
-}
-
-
-// ======================================================
-// CRÉATION D'UNE CARTE ADMIN
-// ======================================================
-
-function creerCarteDemande(
-    demande,
-    materiels
+function creerCarte(
+    demande
 ) {
 
     const article =
-        document.createElement("article");
+        document.createElement(
+            "article"
+        );
 
-    article.classList.add("carte-demande");
+    article.className =
+        "carte-demande";
 
-
-    // Matériel
 
     const titre =
-        document.createElement("h3");
+        document.createElement(
+            "h3"
+        );
 
     titre.textContent =
-        materiels.get(demande.materiel_id)
-        ?? "Matériel inconnu";
+        `${demande._typeLibelle} — ${demande._ressource}`;
 
-    article.appendChild(titre);
-
-
-    // Réservation
 
     const nom =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     nom.textContent =
         `Réservation : ${demande.nom_reservation}`;
 
-    article.appendChild(nom);
-
-
-    // Responsable
 
     const responsable =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     responsable.textContent =
         `Responsable : ${demande.responsable}`;
 
-    article.appendChild(responsable);
-
-
-    // Téléphone
-
-    if (demande.telephone) {
-
-        const telephone =
-            document.createElement("p");
-
-        telephone.textContent =
-            `Téléphone : ${demande.telephone}`;
-
-        article.appendChild(telephone);
-    }
-
-
-    // Destination
-
-    if (demande.destination) {
-
-        const destination =
-            document.createElement("p");
-
-        destination.textContent =
-            `Destination : ${demande.destination}`;
-
-        article.appendChild(destination);
-    }
-
-
-    // Dates
 
     const dates =
-        document.createElement("p");
+        document.createElement(
+            "p"
+        );
 
     dates.textContent =
-        `Du ${formaterDate(demande.date_debut)}
-        au ${formaterDate(demande.date_fin)}`;
+        `Du ${formaterDate(demande.date_debut, demande._modeDate)} au ${formaterDate(demande.date_fin, demande._modeDate)}`;
 
-    article.appendChild(dates);
-
-
-    // Statut
 
     const statut =
-        document.createElement("p");
-
-    statut.textContent =
-        `Statut : ${obtenirLibelleStatut(
-            demande.statut
-        )}`;
+        document.createElement(
+            "p"
+        );
 
     statut.classList.add(
         "statut-demande",
         `statut-${demande.statut}`
     );
 
-    article.appendChild(statut);
+    statut.textContent =
+        obtenirLibelleStatut(
+            demande.statut
+        );
 
 
-    // Notes
+    article.append(
+        titre,
+        nom,
+        responsable,
+        dates,
+        statut
+    );
+
+
+    if (demande.telephone) {
+
+        ajouterTexte(
+            article,
+            `Téléphone : ${demande.telephone}`
+        );
+    }
+
+
+    if (demande.destination) {
+
+        ajouterTexte(
+            article,
+            `Destination : ${demande.destination}`
+        );
+    }
+
+
+    if (
+        demande.nombre_passagers
+    ) {
+
+        ajouterTexte(
+            article,
+            `Passagers : ${demande.nombre_passagers}`
+        );
+    }
+
 
     if (demande.notes) {
 
-        const notes =
-            document.createElement("p");
-
-        notes.textContent =
-            `Notes : ${demande.notes}`;
-
-        article.appendChild(notes);
+        ajouterTexte(
+            article,
+            `Notes : ${demande.notes}`
+        );
     }
 
-
-    // Motif refus
 
     if (
-        demande.statut === "refusee" &&
-        demande.motif_refus
+        demande.confirmee_par_nom
     ) {
 
-        const motif =
-            document.createElement("p");
-
-        motif.textContent =
-            `Motif du refus : ${demande.motif_refus}`;
-
-        article.appendChild(motif);
+        ajouterTexte(
+            article,
+            `Confirmée par : ${demande.confirmee_par_nom} le ${formaterDate(demande.confirmee_at, "datetime-local")}`
+        );
     }
 
 
-    // =============================
-    // BOUTONS SI EN ATTENTE
-    // =============================
+    if (
+        demande.retour_confirme_par_nom
+    ) {
 
-    if (demande.statut === "attente") {
+        ajouterTexte(
+            article,
+            `Retour confirmé par : ${demande.retour_confirme_par_nom} le ${formaterDate(demande.retour_confirme_at, "datetime-local")}`
+        );
+    }
+
+
+    if (demande.motif_refus) {
+
+        ajouterTexte(
+            article,
+            `Motif du refus : ${demande.motif_refus}`
+        );
+    }
+
+
+    if (
+        demande.statut ===
+        "attente"
+    ) {
 
         const actions =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        actions.classList.add(
-            "actions-demande"
-        );
+        actions.className =
+            "actions-demande";
 
 
-        actions.appendChild(
+        actions.append(
             creerBouton(
                 "Confirmer",
                 "confirmer",
-                demande.id
-            )
-        );
+                demande
+            ),
 
-
-        actions.appendChild(
             creerBouton(
                 "Refuser",
                 "refuser",
-                demande.id
+                demande
             )
         );
 
 
-        article.appendChild(actions);
+        article.appendChild(
+            actions
+        );
     }
 
 
-    // =============================
-    // BOUTON RETOUR
-    // =============================
-
     if (
-        demande.statut === "confirme" &&
-        new Date(demande.date_fin).getTime()
-            <= Date.now()
+        demande.statut ===
+            "confirme" &&
+        dateRetourPassee(
+            demande
+        )
     ) {
 
-        const boutonRetour =
+        article.appendChild(
             creerBouton(
                 "Confirmer le retour",
                 "retour",
-                demande.id
-            );
-
-        boutonRetour.dataset.dateFin =
-            demande.date_fin;
-
-        article.appendChild(
-            boutonRetour
+                demande
+            )
         );
     }
 
@@ -345,239 +431,218 @@ function creerCarteDemande(
 }
 
 
+function creerBouton(
+    texte,
+    action,
+    demande
+) {
+
+    const bouton =
+        document.createElement(
+            "button"
+        );
+
+    bouton.type =
+        "button";
+
+    bouton.textContent =
+        texte;
+
+    bouton.dataset.action =
+        action;
+
+    bouton.dataset.id =
+        demande.id;
+
+    bouton.dataset.type =
+        demande._type;
+
+    bouton.classList.add(
+        "bouton-action",
+        `bouton-${action}`
+    );
+
+
+    return bouton;
+}
+
+
+function ajouterTexte(
+    parent,
+    texte
+) {
+
+    const p =
+        document.createElement(
+            "p"
+        );
+
+    p.textContent =
+        texte;
+
+    parent.appendChild(p);
+}
+
+
 // ======================================================
 // AFFICHAGE
 // ======================================================
 
 function afficherDemandes(
-    demandes,
-    materiels
+    demandes
 ) {
 
-    conteneurAttente.innerHTML = "";
-    conteneurConfirmees.innerHTML = "";
-    conteneurRetours.innerHTML = "";
-    conteneurHistorique.innerHTML = "";
+    attente.replaceChildren();
+    confirmees.replaceChildren();
+    retours.replaceChildren();
+    historique.replaceChildren();
 
 
-    let attente = 0;
-    let confirmees = 0;
-    let retours = 0;
-    let historique = 0;
+    let totalAttente = 0;
+    let totalConfirmees = 0;
+    let totalRetours = 0;
+    let totalHistorique = 0;
 
 
-    demandes.forEach(demande => {
+    demandes.forEach(
+        demande => {
 
-        const carte =
-            creerCarteDemande(
-                demande,
-                materiels
-            );
+            const carte =
+                creerCarte(
+                    demande
+                );
 
 
-        // =============================
-        // EN ATTENTE
-        // =============================
+            if (
+                demande.statut ===
+                "attente"
+            ) {
 
-        if (demande.statut === "attente") {
+                attente.appendChild(
+                    carte
+                );
 
-            conteneurAttente.appendChild(
+                totalAttente++;
+
+                return;
+            }
+
+
+            if (
+                demande.statut ===
+                "confirme"
+            ) {
+
+                if (
+                    dateRetourPassee(
+                        demande
+                    )
+                ) {
+
+                    retours.appendChild(
+                        carte
+                    );
+
+                    totalRetours++;
+
+                } else {
+
+                    confirmees.appendChild(
+                        carte
+                    );
+
+                    totalConfirmees++;
+                }
+
+                return;
+            }
+
+
+            historique.appendChild(
                 carte
             );
 
-            attente++;
-
-            return;
+            totalHistorique++;
         }
+    );
 
 
-        // =============================
-        // CONFIRMÉE
-        // =============================
-
-        if (demande.statut === "confirme") {
-
-            const dateFin =
-                new Date(
-                    demande.date_fin
-                ).getTime();
-
-
-            // Date passée :
-            // retour à confirmer
-
-            if (dateFin <= Date.now()) {
-
-                conteneurRetours.appendChild(
-                    carte
-                );
-
-                retours++;
-
-            } else {
-
-                conteneurConfirmees.appendChild(
-                    carte
-                );
-
-                confirmees++;
-            }
-
-            return;
-        }
-
-
-        // =============================
-        // HISTORIQUE
-        // =============================
-
-        conteneurHistorique.appendChild(
-            carte
-        );
-
-        historique++;
-    });
-
-
-    if (attente === 0) {
-
-        conteneurAttente.textContent =
+    if (!totalAttente) {
+        attente.textContent =
             "Aucune demande en attente.";
     }
 
-
-    if (confirmees === 0) {
-
-        conteneurConfirmees.textContent =
+    if (!totalConfirmees) {
+        confirmees.textContent =
             "Aucune réservation confirmée.";
     }
 
-
-    if (retours === 0) {
-
-        conteneurRetours.textContent =
+    if (!totalRetours) {
+        retours.textContent =
             "Aucun retour à confirmer.";
     }
 
-
-    if (historique === 0) {
-
-        conteneurHistorique.textContent =
+    if (!totalHistorique) {
+        historique.textContent =
             "Aucun historique.";
     }
 }
 
 
 // ======================================================
-// CHARGER TOUTES LES DEMANDES
-// ======================================================
-
-async function chargerDemandes() {
-
-    const { data, error } = await supabase
-        .from("reservations_materiel")
-        .select(`
-            id,
-            materiel_id,
-            demandeur_id,
-            nom_reservation,
-            responsable,
-            telephone,
-            destination,
-            date_debut,
-            date_fin,
-            statut,
-            notes,
-            motif_refus,
-            created_at,
-            confirmee_par,
-            confirmee_par_nom,
-            confirmee_at,
-            retour_confirme_par,
-            retour_confirme_par_nom,
-            retour_confirme_at
-        `)
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        );
-
-
-    if (error) {
-
-        console.error(
-            "Erreur chargement demandes :",
-            error
-        );
-
-        conteneurAttente.textContent =
-            "Impossible de charger les demandes.";
-
-        return;
-    }
-
-
-    const materiels =
-        await chargerMateriels(data);
-
-
-    afficherDemandes(
-        data,
-        materiels
-    );
-}
-
-
-// ======================================================
-// CONFIRMER UNE RÉSERVATION
+// CONFIRMATION
 // ======================================================
 
 async function confirmerReservation(
-    reservationId
+    type,
+    id
 ) {
 
-    const confirmation = confirm(
-        "Confirmer cette réservation ?"
-    );
-
-    if (!confirmation) {
-        return;
-    }
-
-    const { data: adminProfile, error: profileError } =
-        await supabase
-            .from("profiles")
-            .select("full_name")
-            .eq("id", admin.id)
-            .single();
-
-    if (profileError) {
-        console.error(
-            "Impossible de récupérer le profil admin :",
-            profileError
+    const configuration =
+        obtenirConfigurationReservation(
+            type
         );
 
+
+    if (!configuration) {
         return;
     }
 
-    const { error } = await supabase
-        .from("reservations_materiel")
-        .update({
-            statut: "confirme",
 
-            confirmee_par: admin.id,
+    if (
+        !confirm(
+            "Confirmer cette réservation ?"
+        )
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabase
+        .from(
+            configuration
+                .tableReservations
+        )
+        .update({
+
+            statut:
+                "confirme",
+
+            confirmee_par:
+                admin.id,
 
             confirmee_par_nom:
-                adminProfile.full_name,
+                nomAdmin,
 
             confirmee_at:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
         })
         .eq(
             "id",
-            reservationId
+            id
         )
         .eq(
             "statut",
@@ -585,64 +650,36 @@ async function confirmerReservation(
         );
 
 
-
     if (error) {
 
-        console.error(
-            "Erreur confirmation :",
-            error
-        );
+        console.error(error);
 
 
-        // Conflit de réservation PostgreSQL
-
-        if (error.code === "23P01") {
+        if (
+            error.code ===
+            "23P01"
+        ) {
 
             alert(
-                "Impossible de confirmer cette demande : le matériel est déjà réservé sur cette période."
+                "Impossible de confirmer : cet élément est déjà réservé sur cette période."
             );
 
         } else {
 
             alert(
-                "Erreur lors de la confirmation."
+                "Impossible de confirmer la réservation."
             );
         }
 
         return;
     }
-    const {
-        data: googleData,
-        error: googleError
-    } = await supabase.functions.invoke(
-            "google-calendar",
-            {
-                body: {
-                    reservationId,
-                    action: "create"
-                }
-            }
-        );
 
-    if (googleError) {
 
-        console.error(
-            "Erreur Google Agenda :",
-            googleError
-        );
-
-        alert(
-            "La réservation est confirmée, mais l'ajout à Google Agenda a échoué."
-        );
-
-    } else {
-
-        console.log(
-            "Événement Google Agenda créé :",
-            googleData
-        );
-    }
-
+    await synchroniserGoogle(
+        id,
+        type,
+        "create"
+    );
 
 
     await chargerDemandes();
@@ -650,36 +687,52 @@ async function confirmerReservation(
 
 
 // ======================================================
-// REFUSER UNE DEMANDE
+// REFUS
 // ======================================================
 
 async function refuserReservation(
-    reservationId
+    type,
+    id
 ) {
 
-    const motif = prompt(
-        "Indiquez le motif du refus :"
-    );
+    const configuration =
+        obtenirConfigurationReservation(
+            type
+        );
 
 
-    // L'utilisateur a cliqué sur Annuler
+    const motif =
+        prompt(
+            "Motif du refus :"
+        );
 
-    if (motif === null) {
+
+    if (
+        motif === null
+    ) {
         return;
     }
 
 
-    const { error } = await supabase
-        .from("reservations_materiel")
+    const {
+        error
+    } = await supabase
+        .from(
+            configuration
+                .tableReservations
+        )
         .update({
-            statut: "refusee",
+
+            statut:
+                "refusee",
 
             motif_refus:
-                motif.trim() || null
+                motif.trim() ||
+                null
         })
         .eq(
             "id",
-            reservationId
+            id
         )
         .eq(
             "statut",
@@ -689,10 +742,7 @@ async function refuserReservation(
 
     if (error) {
 
-        console.error(
-            "Erreur refus réservation :",
-            error
-        );
+        console.error(error);
 
         alert(
             "Impossible de refuser la demande."
@@ -707,86 +757,64 @@ async function refuserReservation(
 
 
 // ======================================================
-// CONFIRMER LE RETOUR DU MATÉRIEL
+// RETOUR
 // ======================================================
 
 async function confirmerRetour(
-    reservationId,
-    dateFin
+    type,
+    id
 ) {
 
-    if (
-        new Date(dateFin).getTime()
-        > Date.now()
-    ) {
-
-        alert(
-            "La date de retour prévue n'est pas encore passée."
+    const configuration =
+        obtenirConfigurationReservation(
+            type
         );
 
+
+    if (
+        !confirm(
+            "Confirmer le retour ?"
+        )
+    ) {
         return;
     }
 
 
-    const confirmation = confirm(
-        "Confirmez-vous que le matériel a bien été retourné ?"
-    );
-
-
-    if (!confirmation) {
-        return;
-    }
-
-
-    const { error } = await supabase
-        .from("reservations_materiel")
+    const {
+        error
+    } = await supabase
+        .from(
+            configuration
+                .tableReservations
+        )
         .update({
-            statut: "termine",
+
+            statut:
+                "termine",
 
             retour_confirme_par:
                 admin.id,
 
             retour_confirme_par_nom:
-                adminProfile.full_name,
+                nomAdmin,
 
             retour_confirme_at:
-                new Date().toISOString()
+                new Date()
+                    .toISOString()
         })
         .eq(
             "id",
-            reservationId
+            id
         )
         .eq(
             "statut",
             "confirme"
         );
 
-    const {
-            error: googleError
-        } = await supabase.functions.invoke(
-            "google-calendar",
-            {
-                body: {
-                    reservationId,
-                    action: "update"
-                }
-            }
-        );
-
-        if (googleError) {
-
-            console.error(
-                "Erreur Google Agenda :",
-                googleError
-            );
-        }
 
     if (error) {
 
-        console.error(
-            "Erreur confirmation retour :",
-            error
-        );
+        console.error(error);
 
         alert(
             "Impossible de confirmer le retour."
@@ -796,12 +824,72 @@ async function confirmerRetour(
     }
 
 
+    await synchroniserGoogle(
+        id,
+        type,
+        "update"
+    );
+
+
     await chargerDemandes();
 }
 
 
 // ======================================================
-// ÉVÉNEMENTS / TRIGGERS JAVASCRIPT
+// GOOGLE CALENDAR
+// ======================================================
+
+async function synchroniserGoogle(
+    reservationId,
+    reservationType,
+    action
+) {
+
+    const {
+        data,
+        error
+    } =
+        await supabase
+            .functions
+            .invoke(
+                "google-calendar",
+                {
+                    body: {
+
+                        reservationId,
+
+                        reservationType,
+
+                        action
+                    }
+                }
+            );
+
+
+    if (error) {
+
+        console.error(
+            "Google Calendar :",
+            error
+        );
+
+        alert(
+            "La réservation a été enregistrée mais la synchronisation Google Agenda a échoué."
+        );
+
+        return;
+    }
+
+
+    console.log(
+        "Google Calendar :",
+        data
+    );
+}
+
+
+// ======================================================
+// EVENTS
 // ======================================================
 
 document.addEventListener(
@@ -819,64 +907,154 @@ document.addEventListener(
         }
 
 
-        const action =
-            bouton.dataset.action;
+        const {
+            action,
+            id,
+            type
+        } = bouton.dataset;
 
-        const reservationId =
-            bouton.dataset.id;
 
-
-        // Empêche les doubles clics
-
-        bouton.disabled = true;
+        bouton.disabled =
+            true;
 
 
         try {
 
-            // CONFIRMER
-
-            if (action === "confirmer") {
+            if (
+                action ===
+                "confirmer"
+            ) {
 
                 await confirmerReservation(
-                    reservationId
+                    type,
+                    id
                 );
 
-                return;
-            }
-
-
-            // REFUSER
-
-            if (action === "refuser") {
+            } else if (
+                action ===
+                "refuser"
+            ) {
 
                 await refuserReservation(
-                    reservationId
+                    type,
+                    id
                 );
 
-                return;
-            }
-
-
-            // RETOUR
-
-            if (action === "retour") {
+            } else if (
+                action ===
+                "retour"
+            ) {
 
                 await confirmerRetour(
-                    reservationId,
-                    bouton.dataset.dateFin
+                    type,
+                    id
                 );
             }
 
         } finally {
 
-            bouton.disabled = false;
+            bouton.disabled =
+                false;
         }
     }
 );
 
 
 // ======================================================
-// INITIALISATION
+// UTILITAIRES
 // ======================================================
+
+function dateRetourPassee(
+    demande
+) {
+
+    if (
+        demande._modeDate ===
+        "date"
+    ) {
+
+        return (
+            new Date(
+                `${demande.date_fin}T23:59:59`
+            ) <=
+            new Date()
+        );
+    }
+
+
+    return (
+        new Date(
+            demande.date_fin
+        ) <=
+        new Date()
+    );
+}
+
+
+function obtenirLibelleStatut(
+    statut
+) {
+
+    return {
+        attente:
+            "En attente",
+
+        confirme:
+            "Confirmée",
+
+        refusee:
+            "Refusée",
+
+        annulee:
+            "Annulée",
+
+        termine:
+            "Terminée"
+    }[statut] ?? statut;
+}
+
+
+function formaterDate(
+    valeur,
+    mode
+) {
+
+    if (!valeur) {
+        return "—";
+    }
+
+
+    if (
+        mode === "date"
+    ) {
+
+        return new Intl.DateTimeFormat(
+            "fr-FR",
+            {
+                dateStyle:
+                    "medium"
+            }
+        ).format(
+            new Date(
+                `${valeur}T12:00:00`
+            )
+        );
+    }
+
+
+    return new Intl.DateTimeFormat(
+        "fr-FR",
+        {
+            dateStyle:
+                "medium",
+
+            timeStyle:
+                "short"
+        }
+    ).format(
+        new Date(valeur)
+    );
+}
+
 
 await chargerDemandes();

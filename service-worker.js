@@ -1,54 +1,56 @@
-const CACHE_NAME = "pwa-stockage-v16.91";
+const CACHE_NAME =
+    "pwa-stockage-v17";
 
 const FILES_TO_CACHE = [
-  "./",
-  "./index.html",
-  "./registrer.html",
-  "./accueil.html",
-  "./agenda.html",
-  "./login.html",
-  "./materiel.html",
-  "./materiel2.html",
-  "./mouvements.html",
-  "./tonnelles.html",
-  "./reservation-tonnelles.html",
-  "./agenda-tonnelles.html",
-  "./minibus.html",
-  "./reservationMinibus.html",
-  "./reservationMateriel.html",
-  "./agendaminibus.html",
-  "./adminReservationsMateriel.html",
-  "./mesDemandesMateriel.html",
-  "./styles.css",
-  "./manifest.webmanifest",
-  "./js/app.js",
-  "./js/supabase.js",
-  "./js/authGuard.js",
-  "./js/login.js",
-  "./js/registrer.js",
-  "./js/adminPage.js",
-  "./js/clientPage.js",
-  "./js/navigation.js",
-  "./js/bodega.js",
-  "./js/materiel.js",
-  "./js/tonelles.js",
-  "./js/minibus.js",
-  "./js/mouvement.js",
-  "./js/mouvementStock.js",
-  "./js/insertarMaterial.js",
-  "./js/reservationTonnelles.js",
-  "./js/agendaTonnelles.js",
-  "./js/reservationMinibus.js",
-  "./js/agendaMinibus.js",
-  "./js/reservationMateriel.js",
-  "./js/mesDemandesMateriel.js",
-  "./js/demandesAdmin.js",
-  "./icons/icon-192.svg",
-  "./icons/icon-512.svg",
-  "./icons/navigation/bodega.svg",
-  "./icons/navigation/materiel.svg",
-  "./icons/navigation/tonnelles.svg",
-  "./icons/navigation/minibus.svg"
+
+    "./",
+
+    "./index.html",
+    "./accueil.html",
+
+    "./login.html",
+    "./registrer.html",
+
+    "./materiel.html",
+    "./materiel2.html",
+    "./minibus.html",
+    "./tonnelles.html",
+    "./mouvements.html",
+
+    "./reservation.html",
+    "./agenda.html",
+    "./mesDemandes.html",
+    "./adminReservations.html",
+
+    "./styles.css",
+    "./manifest.webmanifest",
+
+    "./js/app.js",
+    "./js/supabase.js",
+    "./js/authGuard.js",
+    "./js/navigation.js",
+
+    "./js/reservationsConfig.js",
+    "./js/reservation.js",
+    "./js/agendaReservations.js",
+    "./js/mesDemandes.js",
+    "./js/demandesAdmin.js",
+
+    "./js/bodega.js",
+    "./js/materiel.js",
+    "./js/minibus.js",
+    "./js/tonelles.js",
+    "./js/mouvement.js",
+    "./js/mouvementStock.js",
+    "./js/insertarMaterial.js",
+
+    "./icons/icon-192.svg",
+    "./icons/icon-512.svg",
+
+    "./icons/navigation/bodega.svg",
+    "./icons/navigation/materiel.svg",
+    "./icons/navigation/tonnelles.svg",
+    "./icons/navigation/minibus.svg"
 ];
 
 const OFFLINE_PAGE = new URL(

@@ -2,6 +2,7 @@
 <html lang="fr">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -29,23 +30,30 @@
         src="./js/navigation.js"
     ></script>
 
-    <title>Agenda du matériel</title>
+    <script
+        type="module"
+        src="./js/agendaReservations.js"
+    ></script>
+
+    <title>Agenda des réservations</title>
+
 </head>
+
 
 <body>
 
     <header class="entete-page">
 
-        <h1>Agenda du matériel</h1>
+        <h1>Agenda des réservations</h1>
 
         <nav>
 
-            <a href="./accueil.html">
-                Accueil
+            <a href="./reservation.html">
+                Nouvelle demande
             </a>
 
-            <a href="./reservationMateriel.html">
-                Nouvelle demande
+            <a href="./mesDemandes.html">
+                Mes demandes
             </a>
 
         </nav>
@@ -55,14 +63,42 @@
 
     <main class="page-reservations">
 
-        <label for="selection-materiel-agenda">
-            Sélectionnez un matériel
+        <label for="type-agenda">
+            Type
         </label>
 
-        <select id="selection-materiel-agenda">
+        <select id="type-agenda">
 
             <option value="">
-                Sélectionner un matériel
+                Choisir un type
+            </option>
+
+            <option value="materiel">
+                Matériel
+            </option>
+
+            <option value="minibus">
+                Minibus
+            </option>
+
+            <option value="tonnelle">
+                Tonnelle
+            </option>
+
+        </select>
+
+
+        <label for="selection-ressource-agenda">
+            Élément
+        </label>
+
+        <select
+            id="selection-ressource-agenda"
+            disabled
+        >
+
+            <option value="">
+                Choisissez d'abord un type
             </option>
 
         </select>
@@ -74,14 +110,9 @@
         ></p>
 
 
-        <!--
-            On garde aussi agenda-minibus afin de
-            réutiliser le CSS existant.
-        -->
-
         <section
-            id="agenda-materiel"
-            class="agenda-minibus agenda-materiel"
+            id="agenda-reservations"
+            class="agenda-minibus"
             hidden
         >
 
@@ -90,7 +121,6 @@
                 <button
                     id="bouton-mois-precedent"
                     type="button"
-                    aria-label="Mois précédent"
                 >
                     ←
                 </button>
@@ -100,7 +130,6 @@
                 <button
                     id="bouton-mois-suivant"
                     type="button"
-                    aria-label="Mois suivant"
                 >
                     →
                 </button>
@@ -142,12 +171,6 @@
         </section>
 
     </main>
-
-
-    <script
-        type="module"
-        src="./js/agendaMateriel.js"
-    ></script>
 
 </body>
 

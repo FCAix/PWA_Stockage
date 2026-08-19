@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#ffffff"
+    >
+
+    <link
+        rel="manifest"
+        href="./manifest.webmanifest"
+    >
+
+    <link
+        rel="stylesheet"
+        href="./styles.css"
+    >
+
+    <script
+        type="module"
+        src="./js/navigation.js"
+    ></script>
+
+    <script
+        type="module"
+        src="./js/reservation.js"
+    ></script>
+
+    <title>Nouvelle demande</title>
+
+</head>
+
+
+<body>
+
+    <header class="entete-page">
+
+        <h1>Nouvelle demande de réservation</h1>
+
+        <nav>
+
+            <a href="./agenda.html">
+                Voir l'agenda
+            </a>
+
+            <a href="./mesDemandes.html">
+                Mes demandes
+            </a>
+
+        </nav>
+
+    </header>
+
+
+    <main class="page-reservations">
+
+        <form
+            id="form-reservation"
+            class="formulaire-reservation"
+        >
+
+            <!-- TYPE -->
+
+            <label for="type-reservation">
+                Type de réservation
+            </label>
+
+            <select
+                id="type-reservation"
+                required
+            >
+
+                <option value="">
+                    Choisir un type
+                </option>
+
+                <option value="materiel">
+                    Matériel
+                </option>
+
+                <option value="minibus">
+                    Minibus
+                </option>
+
+                <option value="tonnelle">
+                    Tonnelle
+                </option>
+
+            </select>
+
+
+            <!-- RESSOURCE -->
+
+            <label
+                id="label-selection-ressource"
+                for="selection-ressource-reservation"
+            >
+                Élément à réserver
+            </label>
+
+            <select
+                id="selection-ressource-reservation"
+                required
+                disabled
+            >
+
+                <option value="">
+                    Choisissez d'abord un type
+                </option>
+
+            </select>
+
+
+            <!-- NOM -->
+
+            <label for="nom-reservation">
+                Nom de la réservation
+            </label>
+
+            <input
+                id="nom-reservation"
+                type="text"
+                required
+            >
+
+
+            <!-- RESPONSABLE -->
+
+            <label for="responsable-reservation">
+                Responsable
+            </label>
+
+            <input
+                id="responsable-reservation"
+                type="text"
+                required
+            >
+
+
+            <!-- TELEPHONE -->
+
+            <label for="telephone-reservation">
+                Téléphone
+            </label>
+
+            <input
+                id="telephone-reservation"
+                type="tel"
+            >
+
+
+            <!-- DESTINATION -->
+
+            <label for="destination-reservation">
+                Destination
+            </label>
+
+            <input
+                id="destination-reservation"
+                type="text"
+            >
+
+
+            <!-- PASSAGERS MINIBUS -->
+
+            <div
+                id="groupe-passagers"
+                hidden
+            >
+
+                <label for="nombre-passagers-reservation">
+                    Nombre de passagers
+                </label>
+
+                <input
+                    id="nombre-passagers-reservation"
+                    type="number"
+                    min="1"
+                >
+
+            </div>
+
+
+            <!-- DATES -->
+
+            <label for="date-debut-reservation">
+                Début
+            </label>
+
+            <input
+                id="date-debut-reservation"
+                type="datetime-local"
+                required
+            >
+
+
+            <label for="date-fin-reservation">
+                Fin / retour
+            </label>
+
+            <input
+                id="date-fin-reservation"
+                type="datetime-local"
+                required
+            >
+
+
+            <!-- REPETITION -->
+
+            <label class="option-reservation-repetitive">
+
+                <input
+                    id="reservation-repetitive"
+                    type="checkbox"
+                >
+
+                Répéter chaque semaine
+
+            </label>
+
+
+            <div
+                id="options-repetition"
+                hidden
+            >
+
+                <label for="date-fin-repetition">
+                    Répéter jusqu'au
+                </label>
+
+                <input
+                    id="date-fin-repetition"
+                    type="date"
+                >
+
+                <p id="resume-repetition"></p>
+
+            </div>
+
+
+            <!-- NOTES -->
+
+            <label for="notes-reservation">
+                Notes
+            </label>
+
+            <textarea
+                id="notes-reservation"
+                rows="4"
+            ></textarea>
+
+
+            <button
+                id="bouton-enregistrer-reservation"
+                type="submit"
+            >
+                Envoyer la demande
+            </button>
+
+
+            <p
+                id="message-reservation"
+                role="status"
+            ></p>
+
+        </form>
+
+    </main>
+
+</body>
+
+</html>
