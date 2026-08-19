@@ -319,7 +319,7 @@ async function afficherMateriel() {
                     );
 
                 nom.textContent =
-                    materiel.nombre;
+                    materiel.nom;
 
 
                 // QUANTITÉ
@@ -607,7 +607,7 @@ async function sauvegarderModification(
 
         const informationsModifiees = {
 
-            nombre:
+            nom:
                 nomModification
                     .value
                     .trim(),
