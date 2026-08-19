@@ -77,7 +77,7 @@ async function ajouterTonnelle(event) {
 
   try {
     await insertarMaterial("tonnelles", {
-      nom: document
+      nombre: document
         .querySelector("#nom-tonnelle")
         .value,
 
@@ -91,7 +91,7 @@ async function ajouterTonnelle(event) {
           .value
           .trim() || null,
 
-      etat: "disponible"
+      estado: "disponible"
     });
 
     formulaireTonnelle.reset();
@@ -118,11 +118,11 @@ async function recupererTonnelles() {
     .from("tonnelles")
     .select(`
       id,
-      nom,
+      nombre,
       ubicacion,
-      etat
+      estado
     `)
-    .order("nom", {
+    .order("nombre", {
       ascending: true
     });
 
@@ -161,7 +161,7 @@ async function afficherTonnelles() {
         document.createElement("h2");
 
       nomTonnelle.textContent =
-        tonnelle.nom;
+        tonnelle.nombre;
 
       const lieuTonnelle =
         document.createElement("p");
@@ -173,7 +173,7 @@ async function afficherTonnelles() {
         document.createElement("p");
 
       etatTonnelle.textContent =
-        `État : ${tonnelle.etat}`;
+        `État : ${tonnelle.estado}`;
 
       carteTonnelle.append(
         nomTonnelle,
