@@ -118,11 +118,11 @@ async function recupererTonnelles() {
     .from("tonnelles")
     .select(`
       id,
-      nombre,
+      nom,
       ubicacion,
-      estado
+      etat
     `)
-    .order("nombre", {
+    .order("nom", {
       ascending: true
     });
 
@@ -161,7 +161,7 @@ async function afficherTonnelles() {
         document.createElement("h2");
 
       nomTonnelle.textContent =
-        tonnelle.nombre;
+        tonnelle.nom;
 
       const lieuTonnelle =
         document.createElement("p");
@@ -173,7 +173,7 @@ async function afficherTonnelles() {
         document.createElement("p");
 
       etatTonnelle.textContent =
-        `État : ${tonnelle.estado}`;
+        `État : ${tonnelle.etat}`;
 
       carteTonnelle.append(
         nomTonnelle,
