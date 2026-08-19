@@ -35,10 +35,10 @@ const pagesNavigationAdmin = [
     },
 
     {
-        cle: "reservations",
+        cle: "demandes",
         libelle: "Demandes",
         href: "./adminReservations.html",
-        logo: "./icons/navigation/reservations.svg",
+        logo: "./icons/navigation/Demandes.svg",
 
         pagesAssociees: [
             "adminReservations.html"
