@@ -1,141 +1,907 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="PWA vierge à personnaliser">
+    <meta charset="UTF-8">
 
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./icons/icon-192.svg">
-  <link rel="stylesheet" href="./styles.css">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-  <script type="module" src="./js/bodega.js"></script>
-  <script type="module" src="./js/app.js"></script>
-<script
-    type="module"
-    src="./js/navigation.js"
-></script>
-  <script type="module"src="./js/adminPage.js"></script>
+    <meta
+        name="theme-color"
+        content="#ffffff"
+    >
 
-  <title>PWA de Stockage</title>
+    <meta
+        name="description"
+        content="Gestion de la Bodega"
+    >
+
+    <title>Bodega</title>
+
+    <link
+        rel="manifest"
+        href="./manifest.webmanifest"
+    >
+
+    <link
+        rel="icon"
+        href="./icons/icon-192.svg"
+        type="image/svg+xml"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="./icons/icon-192.svg"
+    >
+
+    <link
+        rel="stylesheet"
+        href="./styles.css"
+    >
+
+    <script
+        type="module"
+        src="./js/bodega.js"
+    ></script>
+
+    <script
+        type="module"
+        src="./js/app.js"
+    ></script>
+
+    <script
+        type="module"
+        src="./js/navigation.js"
+    ></script>
+
 </head>
+
+
 <body>
-  <header>
-    <h1>Stock Bodega</h1>
-  </header>
 
-  <main>
-    
-    <div id="liste_materiel"></div>
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header class="entete-page">
+
+        <div>
+
+            <h1>Bodega</h1>
+
+            <p>
+                Stock, livraisons et ventes
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <main class="page-bodega">
+
+
+        <!-- =================================================
+             RÉSUMÉ
+             ================================================= -->
+
+        <section class="bodega-resume">
+
+            <article class="carte-resume">
+
+                <span>
+                    Produits
+                </span>
+
+                <strong id="resume-nombre-produits">
+                    0
+                </strong>
+
+            </article>
+
+
+            <article class="carte-resume">
+
+                <span>
+                    Stock faible
+                </span>
+
+                <strong id="resume-stock-faible">
+                    0
+                </strong>
+
+            </article>
+
+
+            <article class="carte-resume">
+
+                <span>
+                    Recettes du jour
+                </span>
+
+                <strong id="resume-recettes-jour">
+                    0,00 €
+                </strong>
+
+            </article>
+
+
+            <article class="carte-resume">
+
+                <span>
+                    Recettes du mois
+                </span>
+
+                <strong id="resume-recettes-mois">
+                    0,00 €
+                </strong>
+
+            </article>
+
+        </section>
+
+
+        <!-- =================================================
+             ACTIONS
+             ================================================= -->
+
+        <section class="bodega-actions">
+
+            <button
+                id="bouton-nouvelle-livraison"
+                class="bouton-bodega bouton-livraison"
+                type="button"
+            >
+                + Nouvelle livraison
+            </button>
+
+
+            <button
+                id="bouton-declarer-vente"
+                class="bouton-bodega bouton-vente"
+                type="button"
+            >
+                € Déclarer ventes
+            </button>
+
+
+            <button
+                id="bouton-nouveau-produit"
+                class="bouton-bodega bouton-secondaire"
+                type="button"
+            >
+                Ajouter un produit
+            </button>
+
+        </section>
+
+
+        <!-- =================================================
+             STOCK
+             ================================================= -->
+
+        <section class="section-bodega">
+
+            <div class="section-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Stock actuel
+                    </h2>
+
+                    <p>
+                        Produits actuellement disponibles dans la Bodega
+                    </p>
+
+                </div>
+
+
+                <input
+                    id="recherche-produit"
+                    class="recherche-produit-bodega"
+                    type="search"
+                    placeholder="Rechercher un produit..."
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <div
+                id="liste-stock-bodega"
+                class="liste-stock-bodega"
+            >
+
+                <p>
+                    Chargement du stock...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             VENTES
+             ================================================= -->
+
+        <section class="section-bodega">
+
+            <div class="section-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Dernières ventes
+                    </h2>
+
+                    <p>
+                        Historique des dernières déclarations
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="liste-ventes-bodega"
+                class="liste-operations-bodega"
+            ></div>
+
+        </section>
+
+
+        <!-- =================================================
+             LIVRAISONS
+             ================================================= -->
+
+        <section class="section-bodega">
+
+            <div class="section-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Dernières livraisons
+                    </h2>
+
+                    <p>
+                        Suivi des dernières entrées de stock
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="liste-livraisons-bodega"
+                class="liste-operations-bodega"
+            ></div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =====================================================
+         NOUVELLE LIVRAISON
+         ===================================================== -->
+
     <dialog
-      id="fenetre-modification-bodega"
-      class="fenetre-formulaire"
+        id="dialog-nouvelle-livraison"
+        class="dialog-bodega"
     >
-      <form id="form-modification-bodega" >
-      <input id="identifiant-modification-bodega" type="hidden">
 
-      <label for="nom-modification-bodega">
-        Nom
-      </label>
-
-      <input
-        id="nom-modification-bodega"
-        type="text"
-        required
-      >
-
-      <label for="quantite-modification-bodega">
-        Quantité
-      </label>
-
-      <input
-        id="quantite-modification-bodega"
-        type="number"
-        min="0"
-        required
-      >
-
-      <label for="lieu-modification-bodega">
-        Lieu
-      </label>
-
-      <input
-        id="lieu-modification-bodega"
-        type="text"
-      >
-
-      <label for="etat-modification-bodega">
-        État
-      </label>
-
-      <select id="etat-modification-bodega">
-        <option value="disponible">Disponible</option>
-        <option value="reservado">Réservé</option>
-        <option value="agotado">Épuisé</option>
-        <option value="dañado">Endommagé</option>
-        <option value="retirado">Retiré</option>
-      </select>
-
-      <button id="bouton-sauv-modification-bodega" type="submit">
-        Sauvegarder les modifications
-      </button>
-
-      <button id="bouton-annuler-modification-bodega" type="button">
-        Annuler
-      </button>
-    </form>
-  </dialog>
-
-    <button id="bouton-bodega" type="button">
-      Ajouter materiel
-    </button>
-
-    <dialog
-      id="fenetre-ajout-bodega"
-      class="fenetre-formulaire"
-    >
-      <form id="form-bodega" >
-        <input id="nom-bodega" type="text" placeholder="Nom" required>
-
-        <input
-          id="quantite-bodega"
-          type="number"
-          min="0"
-          placeholder="Quantite"
-          required
+        <form
+            id="form-nouvelle-livraison"
+            class="formulaire-bodega"
         >
 
-        <input
-          id="lieu-bodega"
-          type="text"
-          placeholder="Ubicación"
-        >
+            <header class="dialog-bodega-entete">
 
-        <button id="bouton-sauv-bodega" type="submit">
-          Sauvegarder
-        </button>
+                <div>
 
-        <button id="bouton-annuler-bodega" type="button">
-          Annuler
-        </button>
-      </form>
+                    <h2>
+                        Nouvelle livraison
+                    </h2>
+
+                    <p>
+                        Entrez les quantités reçues.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="bouton-fermer-livraison"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <label for="reference-livraison">
+                Référence
+            </label>
+
+            <input
+                id="reference-livraison"
+                type="text"
+                placeholder="Automatique si vide"
+            >
+
+
+            <label for="fournisseur-livraison">
+                Fournisseur
+            </label>
+
+            <input
+                id="fournisseur-livraison"
+                type="text"
+            >
+
+
+            <section class="section-produits-operation">
+
+                <h3>
+                    Produits livrés
+                </h3>
+
+                <p>
+                    Laissez 0 pour les produits non livrés.
+                </p>
+
+
+                <div
+                    id="produits-livraison"
+                    class="liste-produits-operation"
+                ></div>
+
+            </section>
+
+
+            <label for="notes-livraison">
+                Notes
+            </label>
+
+            <textarea
+                id="notes-livraison"
+                rows="3"
+            ></textarea>
+
+
+            <p
+                id="message-livraison"
+                class="message-bodega"
+            ></p>
+
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-livraison"
+                    type="button"
+                    class="bouton-annuler"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    id="bouton-enregistrer-livraison"
+                    type="submit"
+                    class="bouton-valider"
+                >
+                    Enregistrer
+                </button>
+
+            </footer>
+
+        </form>
+
     </dialog>
 
-    
 
-    <button id="installButton" hidden>
-      Installer l'application
+    <!-- =====================================================
+         VENTE
+         ===================================================== -->
+
+    <dialog
+        id="dialog-declarer-vente"
+        class="dialog-bodega"
+    >
+
+        <form
+            id="form-declarer-vente"
+            class="formulaire-bodega"
+        >
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Déclarer des ventes
+                    </h2>
+
+                    <p>
+                        Entrez toutes les quantités vendues.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="bouton-fermer-vente"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <label for="reference-vente">
+                Référence
+            </label>
+
+            <input
+                id="reference-vente"
+                type="text"
+                placeholder="Automatique si vide"
+            >
+
+
+            <section class="section-produits-operation">
+
+                <h3>
+                    Produits vendus
+                </h3>
+
+
+                <div
+                    id="produits-vente"
+                    class="liste-produits-operation"
+                ></div>
+
+            </section>
+
+
+            <div class="resume-vente">
+
+                <span>
+                    Recette totale
+                </span>
+
+                <strong id="total-vente">
+                    0,00 €
+                </strong>
+
+            </div>
+
+
+            <label for="notes-vente">
+                Notes
+            </label>
+
+            <textarea
+                id="notes-vente"
+                rows="3"
+            ></textarea>
+
+
+            <p
+                id="message-vente"
+                class="message-bodega"
+            ></p>
+
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-vente"
+                    type="button"
+                    class="bouton-annuler"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    id="bouton-enregistrer-vente"
+                    type="submit"
+                    class="bouton-valider"
+                >
+                    Déclarer les ventes
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- =====================================================
+         NOUVEAU PRODUIT
+         ===================================================== -->
+
+    <dialog
+        id="dialog-nouveau-produit"
+        class="dialog-bodega"
+    >
+
+        <form
+            id="form-nouveau-produit"
+            class="formulaire-bodega"
+        >
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Nouveau produit
+                    </h2>
+
+                    <p>
+                        Ajouter un produit au catalogue.
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="bouton-fermer-produit"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <div class="grille-formulaire">
+
+                <div>
+
+                    <label for="produit-nom">
+                        Nom *
+                    </label>
+
+                    <input
+                        id="produit-nom"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-reference">
+                        Référence
+                    </label>
+
+                    <input
+                        id="produit-reference"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-categorie">
+                        Catégorie
+                    </label>
+
+                    <input
+                        id="produit-categorie"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-unite">
+                        Unité
+                    </label>
+
+                    <input
+                        id="produit-unite"
+                        type="text"
+                        value="unidad"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-stock-minimum">
+                        Stock minimum
+                    </label>
+
+                    <input
+                        id="produit-stock-minimum"
+                        type="number"
+                        min="0"
+                        value="0"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-prix">
+                        Prix unitaire (€)
+                    </label>
+
+                    <input
+                        id="produit-prix"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-emplacement">
+                        Emplacement
+                    </label>
+
+                    <input
+                        id="produit-emplacement"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="produit-fournisseur">
+                        Fournisseur
+                    </label>
+
+                    <input
+                        id="produit-fournisseur"
+                        type="text"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <label for="produit-description">
+                Description
+            </label>
+
+            <textarea
+                id="produit-description"
+                rows="2"
+            ></textarea>
+
+
+            <label for="produit-notes">
+                Notes
+            </label>
+
+            <textarea
+                id="produit-notes"
+                rows="2"
+            ></textarea>
+
+
+            <p
+                id="message-produit"
+                class="message-bodega"
+            ></p>
+
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-produit"
+                    type="button"
+                    class="bouton-annuler"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    id="bouton-enregistrer-produit"
+                    type="submit"
+                    class="bouton-valider"
+                >
+                    Ajouter
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
+
+
+    <!-- =====================================================
+         FICHE VENTE
+         ===================================================== -->
+
+    <dialog
+        id="dialog-fiche-vente"
+        class="dialog-bodega dialog-fiche"
+    >
+
+        <article>
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Fiche de vente
+                    </h2>
+
+                    <p id="fiche-vente-reference">
+                        —
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="bouton-fermer-fiche-vente"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <p>
+                Date :
+                <strong id="fiche-vente-date">
+                    —
+                </strong>
+            </p>
+
+
+            <p>
+                Déclarée par :
+                <strong id="fiche-vente-auteur">
+                    —
+                </strong>
+            </p>
+
+
+            <div
+                id="fiche-vente-lignes"
+                class="fiche-operation-lignes"
+            ></div>
+
+
+            <div class="fiche-operation-total">
+
+                <span>
+                    Recette totale
+                </span>
+
+                <strong id="fiche-vente-total">
+                    0,00 €
+                </strong>
+
+            </div>
+
+        </article>
+
+    </dialog>
+
+
+    <!-- =====================================================
+         FICHE LIVRAISON
+         ===================================================== -->
+
+    <dialog
+        id="dialog-fiche-livraison"
+        class="dialog-bodega dialog-fiche"
+    >
+
+        <article>
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Fiche de livraison
+                    </h2>
+
+                    <p id="fiche-livraison-reference">
+                        —
+                    </p>
+
+                </div>
+
+
+                <button
+                    id="bouton-fermer-fiche-livraison"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <p>
+                Date :
+                <strong id="fiche-livraison-date">
+                    —
+                </strong>
+            </p>
+
+
+            <p>
+                Fournisseur :
+                <strong id="fiche-livraison-fournisseur">
+                    —
+                </strong>
+            </p>
+
+
+            <p>
+                Enregistrée par :
+                <strong id="fiche-livraison-auteur">
+                    —
+                </strong>
+            </p>
+
+
+            <div
+                id="fiche-livraison-lignes"
+                class="fiche-operation-lignes"
+            ></div>
+
+        </article>
+
+    </dialog>
+
+
+    <button
+        id="installButton"
+        hidden
+    >
+        Installer l'application
     </button>
-    <a id="bouton-mouvements" type="button" href="./mouvements.html">
-      mouvements
-    </a>
-    
-  </main>
-  
 
-  
 </body>
+
 </html>

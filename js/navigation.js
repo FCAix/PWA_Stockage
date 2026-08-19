@@ -49,10 +49,6 @@ const pagesNavigationAdmin = [
 
         pagesAssociees: [
             "materiel.html",
-
-            "mouvements.html",
-            "tonnelles.html",
-            "minibus.html"
         ]
     },
     {
