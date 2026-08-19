@@ -71,45 +71,105 @@ function fermerFormulaireEnCliquantDehors(event) {
 
 
 async function ajouterTonnelle(event) {
-  event.preventDefault();
 
-  boutonSauvegarderTonnelle.disabled = true;
+    event.preventDefault();
 
-  try {
-    await insertarMaterial("tonnelles", {
-      nom: document
-        .querySelector("#nom-tonnelle")
-        .value,
+    boutonSauvegarderTonnelle.disabled = true;
 
-      quantite: 1,
+    try {
 
-      stockMinim: 0,
+        const nom = document
+            .querySelector("#nom-tonnelle")
+            .value
+            .trim();
 
-      lieu:
-        document
-          .querySelector("#lieu-tonnelle")
-          .value
-          .trim() || null,
+        const lieu = document
+            .querySelector("#lieu-tonnelle")
+            .value
+            .trim();
 
-      estado: "disponible"
-    });
 
-    formulaireTonnelle.reset();
-    fenetreAjoutTonnelle.close();
+        if (!nom) {
+            throw new Error(
+                "Le nom de la tonnelle est obligatoire"
+            );
+        }
 
-    await afficherTonnelles();
 
-    alert("Tonnelle ajoutée correctement");
-  } catch (error) {
-    console.error(
-      "Erreur lors de l'ajout de la tonnelle :",
-      error
-    );
+        const nouvelleTonnelle = {
 
-    alert(`Erreur : ${error.message}`);
-  } finally {
-    boutonSauvegarderTonnelle.disabled = false;
-  }
+            nombre: nom,
+
+            ubicacion:
+                lieu || null,
+
+            estado:
+                "disponible"
+        };
+
+
+        const {
+            data,
+            error
+        } = await supabase
+            .from("tonnelles")
+            .insert(
+                nouvelleTonnelle
+            )
+            .select()
+            .single();
+
+
+        if (error) {
+
+            console.error(
+                "Erreur Supabase :",
+                error
+            );
+
+            throw new Error(
+                error.message
+            );
+        }
+
+
+        console.log(
+            "Tonnelle créée :",
+            data
+        );
+
+
+        formulaireTonnelle.reset();
+
+        fenetreAjoutTonnelle.close();
+
+
+        await afficherTonnelles();
+
+
+        alert(
+            "Tonnelle ajoutée correctement"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur lors de l'ajout de la tonnelle :",
+            error
+        );
+
+
+        alert(
+            `Erreur : ${error.message}`
+        );
+
+
+    } finally {
+
+        boutonSauvegarderTonnelle.disabled =
+            false;
+    }
 }
 
 
