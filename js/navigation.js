@@ -38,7 +38,7 @@ const pagesNavigationAdmin = [
         cle: "demandes",
         libelle: "Demandes",
         href: "./adminReservations.html",
-        logo: "./icons/navigation/Demandes.svg",
+        logo: "./icons/navigation/demandes.svg",
 
         pagesAssociees: [
             "adminReservations.html"
