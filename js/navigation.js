@@ -20,6 +20,28 @@ const pagesNavigationAdmin = [
     },
 
     {
+        cle: "tonnelles",
+        libelle: "Tonnelles",
+        href: "./tonnelles.html",
+        logo: "./icons/navigation/tonnelles.svg",
+
+        pagesAssociees: [
+            "tonnelles.html"
+        ]
+    },
+
+    {
+        cle: "minibus",
+        libelle: "Minibus",
+        href: "./minibus.html",
+        logo: "./icons/navigation/minibus.svg",
+
+        pagesAssociees: [
+            "minibus.html"
+        ]
+    },
+
+    {
         cle: "materiel",
         libelle: "Matériel",
         href: "./materiel.html",
