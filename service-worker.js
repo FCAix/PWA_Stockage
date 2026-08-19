@@ -1,5 +1,5 @@
 const CACHE_NAME =
-    "pwa-stockage-v18.7";
+    "pwa-stockage-v18.8";
 
 const FILES_TO_CACHE = [
 
@@ -38,6 +38,7 @@ const FILES_TO_CACHE = [
 
     "./js/bodega.js",
     "./js/materiel.js",
+    "./js/materialGeneral.js",
     "./js/minibus.js",
     "./js/tonelles.js",
     "./js/mouvement.js",

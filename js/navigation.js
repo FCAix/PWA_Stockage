@@ -43,16 +43,26 @@ const pagesNavigationAdmin = [
 
     {
         cle: "materiel",
-        libelle: "Matériel",
+        libelle: "Stock",
         href: "./materiel.html",
         logo: "./icons/navigation/materiel.svg",
 
         pagesAssociees: [
             "materiel.html",
-            "materiel2.html",
+
             "mouvements.html",
             "tonnelles.html",
             "minibus.html"
+        ]
+    },
+    {
+    cle: "materiel",
+        libelle: "Materiel",
+        href: "./materiel2.html",
+        logo: "./icons/navigation/materiel.svg",
+
+        pagesAssociees: [
+            "materiel2.html",
         ]
     },
 
