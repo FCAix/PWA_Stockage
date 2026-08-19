@@ -1,5 +1,5 @@
 const CACHE_NAME =
-    "pwa-stockage-v18.2";
+    "pwa-stockage-v18.4";
 
 const FILES_TO_CACHE = [
 
@@ -50,7 +50,11 @@ const FILES_TO_CACHE = [
     "./icons/navigation/bodega.svg",
     "./icons/navigation/materiel.svg",
     "./icons/navigation/tonnelles.svg",
-    "./icons/navigation/minibus.svg"
+    "./icons/navigation/minibus.svg",
+    "./icons/navigation/reservations.svg",
+    "./icons/navigation/agenda.svg",
+    "./icons/navigation/demandes.svg"
+
 ];
 
 const OFFLINE_PAGE = new URL(
