@@ -1094,9 +1094,23 @@ function construireProduitsVente() {
             restant.placeholder =
                 "Restant";
 
+            const labelPrix =
+                document.createElement("span");
+
+            labelPrix.textContent =
+                "Prix unitaire";
+
+
+            const labelRestant =
+                document.createElement("span");
+
+            labelRestant.textContent =
+                "Quantité restante";
 
             zoneValeurs.append(
+                labelPrix,
                 prix,
+                labelRestant,
                 restant
             );
 
@@ -1117,7 +1131,7 @@ function construireProduitsVente() {
                 produit.id;
 
             resume.textContent =
-                "Vendu : 0";
+                "Quantité vendue : 0 — Recette : 0,00 €";
 
 
             ligne.append(
@@ -1147,9 +1161,9 @@ function calculerTotalVente() {
     produitsBodega.forEach(
         produit => {
 
-            const quantiteInput =
+            const restantInput =
                 produitsVente.querySelector(
-                    `.quantite-vente-produit[data-id="${produit.id}"]`
+                    `.quantite-restante-produit[data-id="${produit.id}"]`
                 );
 
 
@@ -1159,29 +1173,73 @@ function calculerTotalVente() {
                 );
 
 
-            const quantite =
+            const resume =
+                produitsVente.querySelector(
+                    `.resume-produit-vente[data-id="${produit.id}"]`
+                );
+
+
+            const stockActuel =
                 Number(
-                    quantiteInput?.value ??
-                    0
+                    produit.cantidad
+                );
+
+
+            const quantiteRestante =
+                Number(
+                    restantInput?.value
                 );
 
 
             const prix =
                 Number(
-                    prixInput?.value ??
-                    0
+                    prixInput?.value
                 );
 
 
+            // Valeur incorrecte
+
             if (
-                quantite > 0 &&
-                prix >= 0
+                !Number.isInteger(
+                    quantiteRestante
+                ) ||
+                quantiteRestante < 0 ||
+                quantiteRestante > stockActuel
             ) {
 
-                total +=
-                    quantite *
-                    prix;
+                if (resume) {
+
+                    resume.textContent =
+                        "Quantité restante invalide";
+                }
+
+                return;
             }
+
+
+            const quantiteVendue =
+                stockActuel -
+                quantiteRestante;
+
+
+            const recetteProduit =
+                quantiteVendue *
+                (
+                    Number.isFinite(prix)
+                        ? prix
+                        : 0
+                );
+
+
+            if (resume) {
+
+                resume.textContent =
+                    `Quantité vendue : ${quantiteVendue} — Recette : ${formaterMonnaie(recetteProduit)}`;
+            }
+
+
+            total +=
+                recetteProduit;
         }
     );
 
@@ -1216,9 +1274,9 @@ async function enregistrerVente(
         produitsBodega.forEach(
             produit => {
 
-                const quantiteInput =
+                const restantInput =
                     produitsVente.querySelector(
-                        `.quantite-vente-produit[data-id="${produit.id}"]`
+                        `.quantite-restante-produit[data-id="${produit.id}"]`
                     );
 
 
@@ -1228,23 +1286,71 @@ async function enregistrerVente(
                     );
 
 
-                const quantite =
+                const stockActuel =
                     Number(
-                        quantiteInput?.value ??
-                        0
+                        produit.cantidad
                     );
 
 
+                const quantiteRestante =
+                    Number(
+                        restantInput?.value
+                    );
+
+
+                // ======================================
+                // VALIDATION
+                // ======================================
+
                 if (
                     !Number.isInteger(
-                        quantite
-                    ) ||
-                    quantite <= 0
+                        quantiteRestante
+                    )
+                ) {
+
+                    throw new Error(
+                        `La quantité restante de ${produit.nom} doit être un nombre entier`
+                    );
+                }
+
+
+                if (
+                    quantiteRestante < 0
+                ) {
+
+                    throw new Error(
+                        `La quantité restante de ${produit.nom} ne peut pas être négative`
+                    );
+                }
+
+
+                if (
+                    quantiteRestante >
+                    stockActuel
+                ) {
+
+                    throw new Error(
+                        `Il ne peut pas rester ${quantiteRestante} ${produit.nom} alors que le stock actuel est de ${stockActuel}`
+                    );
+                }
+
+
+                // ======================================
+                // AUCUNE VENTE SUR CE PRODUIT
+                // ======================================
+
+                if (
+                    quantiteRestante ===
+                    stockActuel
                 ) {
 
                     return;
                 }
 
+
+                // ======================================
+                // PRIX
+                // ======================================
 
                 const prix =
                     Number(
@@ -1253,7 +1359,9 @@ async function enregistrerVente(
 
 
                 if (
-                    !Number.isFinite(prix) ||
+                    !Number.isFinite(
+                        prix
+                    ) ||
                     prix < 0
                 ) {
 
@@ -1263,17 +1371,23 @@ async function enregistrerVente(
                 }
 
 
+                // ======================================
+                // LIGNE ENVOYÉE À SUPABASE
+                // ======================================
+
                 lignes.push({
 
                     material_bodega_id:
                         produit.id,
 
-                    quantite,
+                    quantite_restante:
+                        quantiteRestante,
 
                     prix_unitaire:
                         prix
 
                 });
+
             }
         );
 
@@ -1284,7 +1398,7 @@ async function enregistrerVente(
 
             afficherMessage(
                 messageVente,
-                "Indiquez au moins un produit vendu.",
+                "Aucune vente détectée.",
                 true
             );
 
@@ -1320,6 +1434,7 @@ async function enregistrerVente(
 
 
         if (error) {
+
             throw error;
         }
 
