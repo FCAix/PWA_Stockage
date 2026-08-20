@@ -14,6 +14,12 @@ registerForm.addEventListener(
 
         message.textContent = "";
 
+        const fullName =
+            document
+                .querySelector("#full-name")
+                .value
+                .trim();
+
         const email =
             document
                 .querySelector("#email")
@@ -38,12 +44,27 @@ registerForm.addEventListener(
             return;
         }
 
+        if (!fullName) {
+
+            message.textContent =
+                "Veuillez renseigner votre nom.";
+
+            return;
+        }
+
         const {
             data,
             error
         } = await supabase.auth.signUp({
             email,
-            password
+            password,
+            options: {
+
+                data: {
+                    full_name: fullName
+                }
+
+            }
         });
 
         if (error) {
