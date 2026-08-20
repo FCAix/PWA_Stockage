@@ -52,7 +52,7 @@ const pagesNavigationAdmin = [
         ]
     },
     {
-    cle: "materiel",
+    cle: "materiel2",
         libelle: "Materiel",
         href: "./materiel2.html",
         logo: "./icons/navigation/materiel.svg",

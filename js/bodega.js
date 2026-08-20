@@ -996,7 +996,7 @@ function construireProduitsVente() {
                 );
 
             stock.textContent =
-                `Stock : ${produit.cantidad}`;
+                `Stock actuel : ${produit.cantidad}`;
 
 
             infos.append(
@@ -1005,14 +1005,18 @@ function construireProduitsVente() {
             );
 
 
-            const zonePrix =
+            const zoneValeurs =
                 document.createElement(
                     "div"
                 );
 
-            zonePrix.className =
+            zoneValeurs.className =
                 "zone-prix-vente";
 
+
+            // ==========================================
+            // PRIX
+            // ==========================================
 
             const prix =
                 document.createElement(
@@ -1042,44 +1046,84 @@ function construireProduitsVente() {
                 produit.id;
 
 
-            const quantite =
+            // ==========================================
+            // QUANTITÉ RESTANTE
+            // ==========================================
+
+            const restant =
                 document.createElement(
                     "input"
                 );
 
-            quantite.type =
+            restant.type =
                 "number";
 
-            quantite.min =
+            restant.min =
                 "0";
 
-            quantite.max =
+            restant.max =
                 String(
                     produit.cantidad
                 );
 
-            quantite.step =
+            restant.step =
                 "1";
 
-            quantite.value =
-                "0";
 
-            quantite.className =
-                "quantite-vente-produit";
+            // Important :
+            // par défaut, le stock restant est égal
+            // au stock actuel = aucune vente.
 
-            quantite.dataset.id =
+            restant.value =
+                String(
+                    produit.cantidad
+                );
+
+
+            restant.className =
+                "quantite-restante-produit";
+
+            restant.dataset.id =
                 produit.id;
 
+            restant.dataset.stock =
+                String(
+                    produit.cantidad
+                );
 
-            zonePrix.append(
+            restant.placeholder =
+                "Restant";
+
+
+            zoneValeurs.append(
                 prix,
-                quantite
+                restant
             );
+
+
+            // ==========================================
+            // RÉSUMÉ VENDU
+            // ==========================================
+
+            const resume =
+                document.createElement(
+                    "small"
+                );
+
+            resume.className =
+                "resume-produit-vente";
+
+            resume.dataset.id =
+                produit.id;
+
+            resume.textContent =
+                "Vendu : 0";
 
 
             ligne.append(
                 infos,
-                zonePrix
+                zoneValeurs,
+                resume
             );
 
 
