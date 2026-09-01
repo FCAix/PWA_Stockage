@@ -1,5 +1,5 @@
 const CACHE_NAME =
-    "pwa-stockage-v1.0.2";
+    "pwa-stockage-v1.0.3";
 
 const FILES_TO_CACHE = [
 
