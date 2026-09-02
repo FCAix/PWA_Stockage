@@ -80,7 +80,7 @@ registerForm.addEventListener(
         console.log("Utilisateur créé :", data.user);
 
         message.textContent =
-            "Compte créé. Vérifiez votre adresse e-mail.";
+            "Compte créé. Allez vous connecter sur votre compte.";
 
     }
 );
