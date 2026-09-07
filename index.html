@@ -907,6 +907,260 @@
         Installer l'application
     </button>
 
+    <!-- =====================================================
+     MODIFIER PRODUIT
+     ===================================================== -->
+
+    <dialog
+        id="dialog-modifier-produit"
+        class="dialog-bodega"
+    >
+
+        <form
+            id="form-modifier-produit"
+            class="formulaire-bodega"
+        >
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Modifier le produit
+                    </h2>
+
+                    <p>
+                        Modifiez les informations du produit.
+                    </p>
+
+                </div>
+
+                <button
+                    id="bouton-fermer-modification-produit"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <!-- ID caché -->
+
+            <input
+                id="modifier-produit-id"
+                type="hidden"
+            >
+
+
+            <div class="grille-formulaire">
+
+
+                <div>
+
+                    <label for="modifier-produit-nom">
+                        Nom *
+                    </label>
+
+                    <input
+                        id="modifier-produit-nom"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-reference">
+                        Référence
+                    </label>
+
+                    <input
+                        id="modifier-produit-reference"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-categorie">
+                        Catégorie
+                    </label>
+
+                    <input
+                        id="modifier-produit-categorie"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-unite">
+                        Unité
+                    </label>
+
+                    <input
+                        id="modifier-produit-unite"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-stock-minimum">
+                        Stock minimum
+                    </label>
+
+                    <input
+                        id="modifier-produit-stock-minimum"
+                        type="number"
+                        min="0"
+                        step="1"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-prix">
+                        Prix unitaire (€)
+                    </label>
+
+                    <input
+                        id="modifier-produit-prix"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-emplacement">
+                        Emplacement
+                    </label>
+
+                    <input
+                        id="modifier-produit-emplacement"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-fournisseur">
+                        Fournisseur
+                    </label>
+
+                    <input
+                        id="modifier-produit-fournisseur"
+                        type="text"
+                    >
+
+                </div>
+
+
+                <div>
+
+                    <label for="modifier-produit-etat">
+                        État
+                    </label>
+
+                    <select
+                        id="modifier-produit-etat"
+                    >
+
+                        <option value="disponible">
+                            Disponible
+                        </option>
+
+                        <option value="agotado">
+                            Épuisé
+                        </option>
+
+                        <option value="retirado">
+                            Retiré
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <div>
+
+                <label for="modifier-produit-description">
+                    Description
+                </label>
+
+                <textarea
+                    id="modifier-produit-description"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+
+            <div>
+
+                <label for="modifier-produit-notes">
+                    Notes
+                </label>
+
+                <textarea
+                    id="modifier-produit-notes"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+
+            <p
+                id="message-modifier-produit"
+                class="message-bodega"
+            ></p>
+
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-modification-produit"
+                    type="button"
+                    class="bouton-annuler"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    id="bouton-enregistrer-modification-produit"
+                    type="submit"
+                    class="bouton-valider"
+                >
+                    Enregistrer
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
 </body>
 
 </html>

@@ -237,6 +237,30 @@ const dialogFicheLivraison =
         "#dialog-fiche-livraison"
     );
 
+    const dialogModifierProduit =
+    document.querySelector(
+        "#dialog-modifier-produit"
+    );
+
+const formulaireModifierProduit =
+    document.querySelector(
+        "#form-modifier-produit"
+    );
+
+const boutonFermerModificationProduit =
+    document.querySelector(
+        "#bouton-fermer-modification-produit"
+    );
+
+const boutonAnnulerModificationProduit =
+    document.querySelector(
+        "#bouton-annuler-modification-produit"
+    );
+
+const messageModifierProduit =
+    document.querySelector(
+        "#message-modifier-produit"
+    );
 
 // ======================================================
 // ÉVÉNEMENTS
@@ -352,6 +376,20 @@ document
         }
     );
 
+boutonFermerModificationProduit.addEventListener(
+    "click",
+    fermerModificationProduit
+);
+
+boutonAnnulerModificationProduit.addEventListener(
+    "click",
+    fermerModificationProduit
+);
+
+formulaireModifierProduit.addEventListener(
+    "submit",
+    enregistrerModificationProduit
+);
 
 // ======================================================
 // CHARGEMENT GLOBAL
@@ -424,7 +462,7 @@ async function chargerProduits() {
     produitsBodega =
         data ?? [];
 
-
+    
     afficherProduits(
         produitsBodega
     );
@@ -553,6 +591,7 @@ function afficherProduits(
                 `Stock minimum : ${produit.stock_minimo}`
             );
 
+            
 
             if (
                 produit.ubicacion
@@ -586,6 +625,44 @@ function afficherProduits(
                 );
             }
 
+            const actions = document.createElement("div");
+
+            actions.className = "actions-produit-bodega";
+
+
+            const boutonModifier = document.createElement("button");
+
+            boutonModifier.type = "button";
+            boutonModifier.className = "btn-modifier-produit";
+
+            boutonModifier.textContent = "Modifier";
+
+            boutonModifier.addEventListener("click", () => {
+                ouvrirModificationProduit(produit);
+            });
+
+
+            const boutonSupprimer = document.createElement("button");
+
+            boutonSupprimer.type = "button";
+            boutonSupprimer.className = "btn-supprimer-produit";
+
+            boutonSupprimer.textContent = "Supprimer";
+
+            boutonSupprimer.addEventListener("click", async () => {
+                await supprimerProduitBodega(
+                    produit.id,
+                    produit.nom
+                );
+            });
+
+
+            actions.append(
+                boutonModifier,
+                boutonSupprimer
+            );
+
+            article.appendChild(actions);
 
             listeStock.appendChild(
                 article
@@ -925,7 +1002,289 @@ async function enregistrerLivraison(
     }
 }
 
+// ======================================================
+// MODIFIER PRODUIT
+// ======================================================
 
+function ouvrirModificationProduit(produit) {
+
+    document.querySelector(
+        "#modifier-produit-id"
+    ).value =
+        produit.id;
+
+
+    document.querySelector(
+        "#modifier-produit-nom"
+    ).value =
+        produit.nom ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-reference"
+    ).value =
+        produit.referencia ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-categorie"
+    ).value =
+        produit.categoria ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-unite"
+    ).value =
+        produit.unidad ?? "unidad";
+
+
+    document.querySelector(
+        "#modifier-produit-stock-minimum"
+    ).value =
+        produit.stock_minimo ?? 0;
+
+
+    document.querySelector(
+        "#modifier-produit-prix"
+    ).value =
+        produit.precio_unitario ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-emplacement"
+    ).value =
+        produit.ubicacion ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-fournisseur"
+    ).value =
+        produit.proveedor ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-etat"
+    ).value =
+        produit.etat ?? "disponible";
+
+
+    document.querySelector(
+        "#modifier-produit-description"
+    ).value =
+        produit.descripcion ?? "";
+
+
+    document.querySelector(
+        "#modifier-produit-notes"
+    ).value =
+        produit.notas ?? "";
+
+
+    messageModifierProduit.textContent =
+        "";
+
+
+    dialogModifierProduit.showModal();
+}
+
+function fermerModificationProduit() {
+
+    formulaireModifierProduit.reset();
+
+    messageModifierProduit.textContent =
+        "";
+
+    dialogModifierProduit.close();
+}
+
+async function enregistrerModificationProduit(
+    event
+) {
+
+    event.preventDefault();
+
+
+    const id =
+        document.querySelector(
+            "#modifier-produit-id"
+        ).value;
+
+
+    const nom =
+        document.querySelector(
+            "#modifier-produit-nom"
+        ).value.trim();
+
+
+    const referencia =
+        document.querySelector(
+            "#modifier-produit-reference"
+        ).value.trim();
+
+
+    const categoria =
+        document.querySelector(
+            "#modifier-produit-categorie"
+        ).value.trim();
+
+
+    const unidad =
+        document.querySelector(
+            "#modifier-produit-unite"
+        ).value.trim();
+
+
+    const stockMinimo =
+        Number(
+            document.querySelector(
+                "#modifier-produit-stock-minimum"
+            ).value
+        );
+
+
+    const precio =
+        document.querySelector(
+            "#modifier-produit-prix"
+        ).value;
+
+
+    const ubicacion =
+        document.querySelector(
+            "#modifier-produit-emplacement"
+        ).value.trim();
+
+
+    const proveedor =
+        document.querySelector(
+            "#modifier-produit-fournisseur"
+        ).value.trim();
+
+
+    const etat =
+        document.querySelector(
+            "#modifier-produit-etat"
+        ).value;
+
+
+    const descripcion =
+        document.querySelector(
+            "#modifier-produit-description"
+        ).value.trim();
+
+
+    const notas =
+        document.querySelector(
+            "#modifier-produit-notes"
+        ).value.trim();
+
+
+    if (!nom) {
+
+        afficherMessage(
+            messageModifierProduit,
+            "Le nom du produit est obligatoire.",
+            true
+        );
+
+        return;
+    }
+
+
+    if (
+        !Number.isInteger(
+            stockMinimo
+        ) ||
+        stockMinimo < 0
+    ) {
+
+        afficherMessage(
+            messageModifierProduit,
+            "Le stock minimum doit être un entier positif.",
+            true
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } = await supabase
+            .from(
+                "material_bodega"
+            )
+            .update({
+
+                nom,
+
+                referencia:
+                    referencia || null,
+
+                categoria:
+                    categoria || null,
+
+                descripcion:
+                    descripcion || null,
+
+                stock_minimo:
+                    stockMinimo,
+
+                unidad:
+                    unidad || "unidad",
+
+                ubicacion:
+                    ubicacion || null,
+
+                proveedor:
+                    proveedor || null,
+
+                precio_unitario:
+                    precio === ""
+                        ? null
+                        : Number(
+                            precio
+                        ),
+
+                etat,
+
+                notas:
+                    notas || null
+
+            })
+            .eq(
+                "id",
+                id
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        fermerModificationProduit();
+
+
+        await chargerBodega();
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur modification produit :",
+            error
+        );
+
+
+        afficherMessage(
+            messageModifierProduit,
+            error.message,
+            true
+        );
+    }
+}
 // ======================================================
 // VENTE
 // ======================================================
@@ -1248,6 +1607,47 @@ function calculerTotalVente() {
         formaterMonnaie(
             total
         );
+}
+
+// ======================================================
+// SUPPRIMER PRODUIT
+// ======================================================
+async function supprimerProduitBodega(id, nom) {
+
+    const confirmation = confirm(
+        `Voulez-vous vraiment supprimer le produit "${nom}" ?\n\nCette action est définitive.`
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    try {
+
+        const { error } = await supabase
+            .from("material_bodega")
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            throw error;
+        }
+
+        alert(`Produit "${nom}" supprimé.`);
+
+        await chargerBodega();
+
+    } catch (error) {
+
+        console.error(
+            "Erreur lors de la suppression du produit :",
+            error
+        );
+
+        alert(
+            `Impossible de supprimer le produit : ${error.message}`
+        );
+    }
 }
 
 

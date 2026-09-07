@@ -1862,4 +1862,76 @@ tbody tr:hover {
         grid-template-columns:
             1fr;
     }
+    .actions-produit-bodega {
+        flex-direction: column;
+    }
+
+    .btn-modifier-produit,
+    .btn-supprimer-produit {
+        width: 100%;
+    }
+
+
+}
+.actions-produit-bodega {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+
+.btn-modifier-produit,
+.btn-supprimer-produit {
+    flex: 1;
+
+    padding: 8px 10px;
+
+    border-radius: 7px;
+
+    cursor: pointer;
+
+    font-weight: 600;
+}
+
+
+.btn-modifier-produit {
+    border: 1px solid #2457d6;
+
+    background: #ffffff;
+
+    color: #2457d6;
+}
+
+
+.btn-modifier-produit:hover {
+    background: #eef2ff;
+}
+
+
+.btn-supprimer-produit {
+    border: none;
+
+    background: #dc3545;
+
+    color: white;
+}
+
+
+.btn-supprimer-produit:hover {
+    opacity: 0.85;
+}
+
+
+#modifier-produit-etat {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d1d5db;
+
+    border-radius: 8px;
+
+    background: white;
 }
