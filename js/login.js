@@ -58,7 +58,7 @@ loginForm.addEventListener("submit", async (event) => {
 
     } else {
 
-        window.location.href = "./client.html";
+        window.location.href = "./accueil.html";
 
     }
 });
