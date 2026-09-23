@@ -182,6 +182,7 @@ async function recupererTonnelles() {
       ubicacion,
       estado
     `)
+    .neq("estado", "supprime")
     .order("nombre", {
       ascending: true
     });
@@ -195,63 +196,281 @@ async function recupererTonnelles() {
 
 
 async function afficherTonnelles() {
-  listeTonnelles.textContent =
-    "Chargement des tonnelles...";
-
-  try {
-    const tonnelles = await recupererTonnelles();
-
-    listeTonnelles.replaceChildren();
-
-    if (tonnelles.length === 0) {
-      listeTonnelles.textContent =
-        "Aucune tonnelle enregistrée.";
-
-      return;
-    }
-
-    tonnelles.forEach((tonnelle) => {
-      const carteTonnelle =
-        document.createElement("article");
-
-      carteTonnelle.className =
-        "carte-tonnelle";
-
-      const nomTonnelle =
-        document.createElement("h2");
-
-      nomTonnelle.textContent =
-        tonnelle.nombre;
-
-      const lieuTonnelle =
-        document.createElement("p");
-
-      lieuTonnelle.textContent =
-        `Lieu : ${tonnelle.ubicacion || "Non renseigné"}`;
-
-      const etatTonnelle =
-        document.createElement("p");
-
-      etatTonnelle.textContent =
-        `État : ${tonnelle.estado}`;
-
-      carteTonnelle.append(
-        nomTonnelle,
-        lieuTonnelle,
-        etatTonnelle
-      );
-
-      listeTonnelles.appendChild(
-        carteTonnelle
-      );
-    });
-  } catch (error) {
-    console.error(
-      "Erreur lors du chargement des tonnelles :",
-      error
-    );
 
     listeTonnelles.textContent =
-      `Impossible de charger les tonnelles : ${error.message}`;
-  }
+        "Chargement des tonnelles...";
+
+    try {
+
+        const tonnelles =
+            await recupererTonnelles();
+
+
+        listeTonnelles.replaceChildren();
+
+
+        if (tonnelles.length === 0) {
+
+            listeTonnelles.textContent =
+                "Aucune tonnelle enregistrée.";
+
+            return;
+        }
+
+
+        tonnelles.forEach(
+            (tonnelle) => {
+
+                const carteTonnelle =
+                    document.createElement("article");
+
+                carteTonnelle.className =
+                    "carte-tonnelle";
+
+
+                // =========================================
+                // NOM
+                // =========================================
+
+                const nomTonnelle =
+                    document.createElement("h2");
+
+                nomTonnelle.textContent =
+                    tonnelle.nombre;
+
+
+                // =========================================
+                // LIEU
+                // =========================================
+
+                const lieuTonnelle =
+                    document.createElement("p");
+
+                lieuTonnelle.textContent =
+                    `Lieu : ${
+                        tonnelle.ubicacion ||
+                        "Non renseigné"
+                    }`;
+
+
+                // =========================================
+                // ÉTAT
+                // =========================================
+
+                const etatTonnelle =
+                    document.createElement("p");
+
+                etatTonnelle.textContent =
+                    `État : ${
+                        tonnelle.estado
+                    }`;
+
+
+                // =========================================
+                // CONTENEUR BOUTONS
+                // =========================================
+
+                const actions =
+                    document.createElement("div");
+
+                actions.className =
+                    "actions-tonnelle";
+
+
+                // =========================================
+                // BOUTON MODIFIER
+                // =========================================
+
+                const boutonModifier =
+                    document.createElement("button");
+
+                boutonModifier.type =
+                    "button";
+
+                boutonModifier.className =
+                    "bouton-modifier-tonnelle";
+
+                boutonModifier.textContent =
+                    "Modifier";
+
+
+                boutonModifier.addEventListener(
+                    "click",
+                    () => {
+
+                        ouvrirModificationTonnelle(
+                            tonnelle
+                        );
+
+                    }
+                );
+
+
+                // =========================================
+                // BOUTON SUPPRIMER
+                // =========================================
+
+                const boutonSupprimer =
+                    document.createElement("button");
+
+                boutonSupprimer.type =
+                    "button";
+
+                boutonSupprimer.className =
+                    "bouton-supprimer-tonnelle";
+
+                boutonSupprimer.textContent =
+                    "Supprimer";
+
+
+                boutonSupprimer.addEventListener(
+                    "click",
+                    () => {
+
+                        supprimerTonnelle(
+                            tonnelle.id,
+                            tonnelle.nombre
+                        );
+
+                    }
+                );
+
+
+                actions.append(
+                    boutonModifier,
+                    boutonSupprimer
+                );
+
+
+                // =========================================
+                // CARTE
+                // =========================================
+
+                carteTonnelle.append(
+                    nomTonnelle,
+                    lieuTonnelle,
+                    etatTonnelle,
+                    actions
+                );
+
+
+                listeTonnelles.appendChild(
+                    carteTonnelle
+                );
+            }
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur lors du chargement des tonnelles :",
+            error
+        );
+
+
+        listeTonnelles.textContent =
+            `Impossible de charger les tonnelles : ${error.message}`;
+    }
+}
+
+async function supprimerTonnelle(
+    tonnelleId,
+    nomTonnelle
+) {
+
+    const confirmation =
+        window.confirm(
+            `Voulez-vous vraiment supprimer "${nomTonnelle}" ?\n\n` +
+            `La tonnelle sera retirée des listes et ` +
+            `ses réservations futures seront supprimées.`
+        );
+
+
+    if (!confirmation) {
+        return;
+    }
+
+
+    try {
+
+        const {
+            error
+        } = await supabase
+            .from("tonnelles")
+            .update({
+                estado: "supprime"
+            })
+            .eq(
+                "id",
+                tonnelleId
+            );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        await afficherTonnelles();
+
+
+        alert(
+            "Tonnelle supprimée correctement."
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur suppression tonnelle :",
+            error
+        );
+
+
+        alert(
+            `Erreur : ${error.message}`
+        );
+    }
+}
+
+async function modifierTonnelle(
+    tonnelleId,
+    nombre,
+    ubicacion,
+    estado
+) {
+
+    try {
+
+        const { error } = await supabase
+            .from("tonnelles")
+            .update({
+                nombre: nombre.trim(),
+                ubicacion:
+                    ubicacion.trim() || null,
+                estado
+            })
+            .eq(
+                "id",
+                tonnelleId
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        await afficherTonnelles();
+
+    } catch (error) {
+
+        console.error(
+            "Erreur modification tonnelle :",
+            error
+        );
+
+        alert(
+            `Erreur : ${error.message}`
+        );
+    }
 }
