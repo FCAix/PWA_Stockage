@@ -474,3 +474,76 @@ async function modifierTonnelle(
         );
     }
 }
+
+async function ouvrirModificationTonnelle(
+    tonnelle
+) {
+
+    const nouveauNom =
+        window.prompt(
+            "Nom de la tonnelle :",
+            tonnelle.nombre
+        );
+
+
+    if (
+        nouveauNom === null
+    ) {
+        return;
+    }
+
+
+    const nouveauLieu =
+        window.prompt(
+            "Lieu :",
+            tonnelle.ubicacion || ""
+        );
+
+
+    if (
+        nouveauLieu === null
+    ) {
+        return;
+    }
+
+
+    const {
+        error
+    } = await supabase
+        .from("tonnelles")
+        .update({
+
+            nombre:
+                nouveauNom.trim(),
+
+            ubicacion:
+                nouveauLieu.trim() || null
+
+        })
+        .eq(
+            "id",
+            tonnelle.id
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Erreur modification tonnelle :",
+            error
+        );
+
+        alert(
+            `Erreur : ${error.message}`
+        );
+
+        return;
+    }
+
+
+    await afficherTonnelles();
+
+    alert(
+        "Tonnelle modifiée correctement."
+    );
+}
