@@ -2338,6 +2338,21 @@ async function chargerHistoriqueLivraisons() {
             bouton.dataset.id =
                 livraison.id;
 
+            const boutonModifier =
+                document.createElement("button");
+
+            boutonModifier.type =
+                "button";
+
+            boutonModifier.textContent =
+                "Modifier";
+
+            boutonModifier.dataset.action =
+                "modifier-livraison";
+
+            boutonModifier.dataset.id =
+                livraison.id;
+
 
             const actions =
                 document.createElement(
