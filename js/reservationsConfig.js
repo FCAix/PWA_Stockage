@@ -2,8 +2,8 @@ export const typesReservation = {
 
     materiel: {
         cle: "materiel",
-        libelle: "Matériel",
-        libelleSelection: "Sélectionnez un matériel",
+        libelle: "Bâtiment",
+        libelleSelection: "Sélectionnez une salle",
 
         tableReservations:
             "reservations_materiel",

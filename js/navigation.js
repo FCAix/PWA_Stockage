@@ -43,7 +43,7 @@ const pagesNavigationAdmin = [
 
     {
         cle: "materiel",
-        libelle: "Stock",
+        libelle: "Materiel",
         href: "./materiel.html",
         logo: "./icons/navigation/materiel.svg",
 
@@ -53,7 +53,7 @@ const pagesNavigationAdmin = [
     },
     {
     cle: "materiel2",
-        libelle: "Materiel",
+        libelle: "Bâtiment",
         href: "./materiel2.html",
         logo: "./icons/navigation/materiel.svg",
 
