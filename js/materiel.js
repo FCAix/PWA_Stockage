@@ -23,9 +23,7 @@ const nomModification = document.querySelector(
   "#nom-modification-mat"
 );
 
-const quantiteModification = document.querySelector(
-  "#quantite-modification-mat"
-);
+
 
 const lieuModification = document.querySelector(
   "#lieu-modification-mat"
@@ -89,9 +87,7 @@ async function ajoutMat(event) {
     await insertarMaterial(nomTable, {
       nom: document.querySelector("#nom-mat").value,
 
-      quantite: document.querySelector(
-        "#quantite-mat"
-      ).value,
+      quantite: 1,
 
       lieu:
         document
@@ -106,10 +102,10 @@ async function ajoutMat(event) {
 
     await afficherMateriel();
 
-    alert("Matériel ajouté correctement");
+    alert("Salle ajoutée correctement");
   } catch (error) {
     console.error(
-      "Erreur lors de l'ajout du matériel :",
+      "Erreur lors de l'ajout de la salle :",
       error
     );
 
@@ -138,7 +134,7 @@ async function recupererMateriel() {
 
 async function afficherMateriel() {
   listeMateriel.innerHTML =
-    "<p>Chargement du matériel...</p>";
+    "<p>Chargement des salles...</p>";
 
   try {
     const materiels = await recupererMateriel();
@@ -147,7 +143,7 @@ async function afficherMateriel() {
 
     if (materiels.length === 0) {
       listeMateriel.innerHTML =
-        "<p>Aucun matériel enregistré.</p>";
+        "<p>Aucune salle enregistrée.</p>";
 
       return;
     }
@@ -163,11 +159,6 @@ async function afficherMateriel() {
 
       nomMateriel.textContent = materiel.nom;
 
-      const quantiteMateriel =
-        document.createElement("p");
-
-      quantiteMateriel.textContent =
-        `Quantité : ${materiel.cantidad}`;
 
       const lieuMateriel =
         document.createElement("p");
@@ -203,7 +194,7 @@ async function afficherMateriel() {
 
       carteMateriel.append(
         nomMateriel,
-        quantiteMateriel,
+        
         lieuMateriel,
         etatMateriel,
         boutonModifier,
@@ -341,7 +332,7 @@ async function sauvegarderModification(event) {
                 identifiantModification.value,
                 typeMouvement: "ajuste_positivo",
                 quantite: differenceQuantite,
-                motif: "Modification manuelle du stock"
+                motif: "Ajout de salle"
             });
             }
 
@@ -352,7 +343,7 @@ async function sauvegarderModification(event) {
                 identifiantModification.value,
                 typeMouvement: "ajuste_negativo",
                 quantite: Math.abs(differenceQuantite),
-                motif: "Modification manuelle du stock"
+                motif: "Effacement de la salle"
             });
             }
 
