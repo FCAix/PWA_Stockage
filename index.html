@@ -340,7 +340,19 @@
                 type="text"
                 placeholder="Automatique si vide"
             >
+            <div class="champ-formulaire">
 
+                <label for="date-livraison">
+                    Date de livraison *
+                </label>
+
+                <input
+                    id="date-livraison"
+                    type="date"
+                    required
+                >
+
+            </div>
 
             <label for="fournisseur-livraison">
                 Fournisseur
@@ -412,6 +424,148 @@
 
     </dialog>
 
+    <dialog
+        id="dialog-modifier-livraison"
+        class="dialog-bodega"
+    >
+
+        <form
+            id="form-modifier-livraison"
+            class="formulaire-bodega"
+        >
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+
+                    <h2>
+                        Modifier la livraison
+                    </h2>
+
+                    <p>
+                        Corrigez les informations ou les quantités.
+                    </p>
+
+                </div>
+
+                <button
+                    id="bouton-fermer-modification-livraison"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                >
+                    ×
+                </button>
+
+            </header>
+
+
+            <input
+                id="modifier-livraison-id"
+                type="hidden"
+            >
+
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-reference-livraison">
+                    Référence
+                </label>
+
+                <input
+                    id="modifier-reference-livraison"
+                    type="text"
+                >
+
+            </div>
+
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-date-livraison">
+                    Date de livraison *
+                </label>
+
+                <input
+                    id="modifier-date-livraison"
+                    type="date"
+                    required
+                >
+
+            </div>
+
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-fournisseur-livraison">
+                    Fournisseur
+                </label>
+
+                <input
+                    id="modifier-fournisseur-livraison"
+                    type="text"
+                >
+
+            </div>
+
+
+            <section class="section-produits-operation">
+
+                <h3>
+                    Quantités livrées
+                </h3>
+
+                <div
+                    id="produits-modification-livraison"
+                    class="liste-produits-operation"
+                ></div>
+
+            </section>
+
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-notes-livraison">
+                    Notes
+                </label>
+
+                <textarea
+                    id="modifier-notes-livraison"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+
+            <p
+                id="message-modifier-livraison"
+                class="message-bodega"
+            ></p>
+
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-modification-livraison"
+                    class="bouton-annuler"
+                    type="button"
+                >
+                    Annuler
+                </button>
+
+
+                <button
+                    id="bouton-enregistrer-modification-livraison"
+                    class="bouton-valider"
+                    type="submit"
+                >
+                    Enregistrer les modifications
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
 
     <!-- =====================================================
          VENTE

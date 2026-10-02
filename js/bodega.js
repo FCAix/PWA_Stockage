@@ -61,6 +61,45 @@ const resumeRecettesMois =
 
 
 // LIVRAISON
+const dateLivraison =
+    document.querySelector(
+        "#date-livraison"
+    );
+
+
+const dialogModifierLivraison =
+    document.querySelector(
+        "#dialog-modifier-livraison"
+    );
+
+
+const formulaireModifierLivraison =
+    document.querySelector(
+        "#form-modifier-livraison"
+    );
+
+
+const produitsModificationLivraison =
+    document.querySelector(
+        "#produits-modification-livraison"
+    );
+
+const boutonFermerModificationLivraison =
+    document.querySelector(
+        "#bouton-fermer-modification-livraison"
+    );
+
+
+const boutonAnnulerModificationLivraison =
+    document.querySelector(
+        "#bouton-annuler-modification-livraison"
+    );
+
+
+const messageModifierLivraison =
+    document.querySelector(
+        "#message-modifier-livraison"
+    );
 
 const boutonNouvelleLivraison =
     document.querySelector(
@@ -284,6 +323,23 @@ boutonAnnulerLivraison.addEventListener(
 formulaireLivraison.addEventListener(
     "submit",
     enregistrerLivraison
+);
+
+boutonFermerModificationLivraison.addEventListener(
+    "click",
+    fermerModificationLivraison
+);
+
+
+boutonAnnulerModificationLivraison.addEventListener(
+    "click",
+    fermerModificationLivraison
+);
+
+
+formulaireModifierLivraison.addEventListener(
+    "submit",
+    enregistrerModificationLivraison
 );
 
 
@@ -767,6 +823,7 @@ function ouvrirNouvelleLivraison() {
     construireProduitsLivraison();
 
     dialogLivraison.showModal();
+    dateLivraison.value = "";
 }
 
 
@@ -945,6 +1002,9 @@ async function enregistrerLivraison(
                             .value
                             .trim() ||
                         null,
+
+                    p_date_livraison:
+                        dateLivraison.value,
 
                     p_notes:
                         notesLivraison
@@ -2169,11 +2229,11 @@ async function chargerHistoriqueLivraisons() {
             id,
             reference,
             fournisseur,
-            date_operation,
+            date_livraison,
             created_by_name
         `)
         .order(
-            "date_operation",
+            "date_livraison",
             {
                 ascending: false
             }
@@ -2240,8 +2300,8 @@ async function chargerHistoriqueLivraisons() {
                 );
 
             date.textContent =
-                formaterDate(
-                    livraison.date_operation
+                formaterDateLivraison(
+                    livraison.date_livraison
                 );
 
 
@@ -2279,10 +2339,25 @@ async function chargerHistoriqueLivraisons() {
                 livraison.id;
 
 
+            const actions =
+                document.createElement(
+                    "div"
+                );
+
+            actions.className =
+                "actions-operation-bodega";
+
+
+            actions.append(
+                bouton,
+                boutonModifier
+            );
+
+
             article.append(
                 zone,
                 fournisseur,
-                bouton
+                actions
             );
 
 
@@ -2330,6 +2405,15 @@ async function gererClicHistorique(
     ) {
 
         await ouvrirFicheLivraison(
+            bouton.dataset.id
+        );
+    }
+    if (
+        bouton.dataset.action ===
+        "modifier-livraison"
+    ) {
+
+        await ouvrirModificationLivraison(
             bouton.dataset.id
         );
     }
@@ -2552,8 +2636,8 @@ async function ouvrirFicheLivraison(
     document.querySelector(
         "#fiche-livraison-date"
     ).textContent =
-        formaterDate(
-            livraison.date_operation
+        formaterDateLivraison(
+            livraison.date_livraison
         );
 
 
@@ -2827,6 +2911,372 @@ function estMemeJour(
     );
 }
 
+async function ouvrirModificationLivraison(
+            livraisonId
+        ) {
+
+            const [
+                livraisonResultat,
+                lignesResultat
+            ] = await Promise.all([
+
+                supabase
+                    .from("bodega_livraisons")
+                    .select("*")
+                    .eq(
+                        "id",
+                        livraisonId
+                    )
+                    .single(),
+
+                supabase
+                    .from("bodega_livraison_lignes")
+                    .select("*")
+                    .eq(
+                        "livraison_id",
+                        livraisonId
+                    )
+
+            ]);
+
+
+            if (
+                livraisonResultat.error
+                ||
+                lignesResultat.error
+            ) {
+
+                throw (
+                    livraisonResultat.error
+                    ||
+                    lignesResultat.error
+                );
+            }
+
+
+            const livraison =
+                livraisonResultat.data;
+
+
+            document.querySelector(
+                "#modifier-livraison-id"
+            ).value =
+                livraison.id;
+
+
+            document.querySelector(
+                "#modifier-reference-livraison"
+            ).value =
+                livraison.reference;
+
+
+            document.querySelector(
+                "#modifier-date-livraison"
+            ).value =
+                livraison.date_livraison;
+
+
+            document.querySelector(
+                "#modifier-fournisseur-livraison"
+            ).value =
+                livraison.fournisseur || "";
+
+
+            document.querySelector(
+                "#modifier-notes-livraison"
+            ).value =
+                livraison.notes || "";
+
+
+            construireProduitsModificationLivraison(
+                lignesResultat.data
+            );
+
+
+            dialogModifierLivraison.showModal();
+        }
+
+function construireProduitsModificationLivraison(
+        lignesExistantes
+    ) {
+
+        produitsModificationLivraison
+            .replaceChildren();
+
+
+        const quantites =
+            new Map();
+
+
+        lignesExistantes.forEach(
+            ligne => {
+
+                quantites.set(
+                    ligne.material_bodega_id,
+                    ligne.quantite
+                );
+
+            }
+        );
+
+
+        produitsBodega.forEach(
+            produit => {
+
+                const ligne =
+                    document.createElement(
+                        "div"
+                    );
+
+                ligne.className =
+                    "ligne-produit-operation";
+
+
+                const infos =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                const nom =
+                    document.createElement(
+                        "strong"
+                    );
+
+                nom.textContent =
+                    produit.nom;
+
+
+                const stock =
+                    document.createElement(
+                        "small"
+                    );
+
+                stock.textContent =
+                    `Stock actuel : ${produit.cantidad}`;
+
+
+                infos.append(
+                    nom,
+                    stock
+                );
+
+
+                const input =
+                    document.createElement(
+                        "input"
+                    );
+
+                input.type =
+                    "number";
+
+                input.min =
+                    "0";
+
+                input.step =
+                    "1";
+
+                input.value =
+                    String(
+                        quantites.get(
+                            produit.id
+                        ) || 0
+                    );
+
+                input.className =
+                    "quantite-modification-livraison";
+
+                input.dataset.id =
+                    produit.id;
+
+
+                ligne.append(
+                    infos,
+                    input
+                );
+
+
+                produitsModificationLivraison
+                    .appendChild(
+                        ligne
+                    );
+            }
+        );
+    }
+
+async function enregistrerModificationLivraison(
+        event
+    ) {
+
+        event.preventDefault();
+
+
+        const livraisonId =
+            document.querySelector(
+                "#modifier-livraison-id"
+            ).value;
+
+
+        const lignes =
+            Array.from(
+                document.querySelectorAll(
+                    ".quantite-modification-livraison"
+                )
+            )
+            .map(
+                input => ({
+
+                    material_bodega_id:
+                        input.dataset.id,
+
+                    quantite:
+                        Number(
+                            input.value
+                        )
+
+                })
+            )
+            .filter(
+                ligne =>
+                    Number.isInteger(
+                        ligne.quantite
+                    ) &&
+                    ligne.quantite > 0
+            );
+
+
+        if (!dateModificationLivraison.value) {
+
+            messageModifierLivraison.textContent =
+                "La date de livraison est obligatoire.";
+
+            return;
+        }
+
+
+        if (lignes.length === 0) {
+
+            messageModifierLivraison.textContent =
+                "La livraison doit contenir au moins un produit.";
+
+            return;
+        }
+
+
+        try {
+
+            const {
+                error
+            } = await supabase
+                .rpc(
+                    "modifier_livraison_bodega",
+                    {
+
+                        p_livraison_id:
+                            livraisonId,
+
+                        p_reference:
+                            document.querySelector(
+                                "#modifier-reference-livraison"
+                            ).value.trim(),
+
+                        p_fournisseur:
+                            document.querySelector(
+                                "#modifier-fournisseur-livraison"
+                            ).value.trim() ||
+                            null,
+
+                        p_date_livraison:
+                            document.querySelector(
+                                "#modifier-date-livraison"
+                            ).value,
+
+                        p_notes:
+                            document.querySelector(
+                                "#modifier-notes-livraison"
+                            ).value.trim() ||
+                            null,
+
+                        p_lignes:
+                            lignes
+
+                    }
+                );
+
+
+            if (error) {
+                throw error;
+            }
+
+
+            fermerModificationLivraison();
+
+
+            await chargerBodega();
+
+
+            alert(
+                "Livraison modifiée correctement."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Erreur modification livraison :",
+                error
+            );
+
+
+            messageModifierLivraison.textContent =
+                error.message;
+        }
+    }
+
+function fermerModificationLivraison() {
+
+    formulaireModifierLivraison.reset();
+
+    messageModifierLivraison.textContent =
+        "";
+
+    produitsModificationLivraison
+        .replaceChildren();
+
+    dialogModifierLivraison.close();
+}
+
+function formaterDateLivraison(
+    valeur
+) {
+
+    if (!valeur) {
+        return "—";
+    }
+
+
+    const [
+        annee,
+        mois,
+        jour
+    ] =
+        valeur.split("-")
+        .map(Number);
+
+
+    return new Intl.DateTimeFormat(
+        "fr-FR",
+        {
+            dateStyle: "long"
+        }
+    ).format(
+        new Date(
+            annee,
+            mois - 1,
+            jour
+        )
+    );
+}
 
 // ======================================================
 // INITIALISATION
