@@ -320,6 +320,11 @@ function creerCarte(
 
 
     const occurrences = demande._occurrences ?? [demande];
+    
+    const dates =
+        document.createElement(
+            "p"
+        );
 
     dates.textContent =
         occurrences.length > 1
