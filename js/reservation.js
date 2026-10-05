@@ -697,146 +697,73 @@ function creerInformationsReservation() {
 
 function creerReservations() {
 
-    const base =
-        creerInformationsReservation();
+    const base = creerInformationsReservation();
 
+    const debutInitial = convertirValeurDate(
+        dateDebut.value
+    );
 
-    const debutInitial =
-        convertirValeurDate(
-            dateDebut.value
-        );
+    const finInitial = convertirValeurDate(
+        dateFin.value
+    );
 
-    const finInitial =
-        convertirValeurDate(
-            dateFin.value
-        );
-
-
-    if (
-        !reservationRepetitive
-            .checked
-    ) {
-
-        return [
-            {
-                ...base,
-
-                date_debut:
-                    serialiserDate(
-                        debutInitial
-                    ),
-
-                date_fin:
-                    serialiserDate(
-                        finInitial
-                    ),
-
-                serie_id:
-                    null
-            }
-        ];
+    // Réservation sans répétition
+    if (!reservationRepetitive.checked) {
+        return [{
+            ...base,
+            date_debut: serialiserDate(debutInitial),
+            date_fin: serialiserDate(finInitial),
+            serie_id: null,
+            date_fin_repetition: null
+        }];
     }
 
-
-    if (
-        !dateFinRepetition.value
-    ) {
-
+    if (!dateFinRepetition.value) {
         throw new Error(
             "Indiquez la date de fin de répétition."
         );
     }
 
+    const limite = new Date(
+        `${dateFinRepetition.value}T23:59:59`
+    );
 
-    const limite =
-        new Date(
-            `${dateFinRepetition.value}T23:59:59`
-        );
-
-
-    if (
-        limite <
-        debutInitial
-    ) {
-
+    if (limite < debutInitial) {
         throw new Error(
-            "La fin de répétition doit être postérieure à la première réservation."
+            "La fin de répétition doit être postérieure au début."
         );
     }
 
+    // Limite à 104 occurrences, sans les insérer en base.
+    let nombreOccurrences = 0;
+    let occurrence = new Date(debutInitial);
 
-    const serieId =
-        crypto.randomUUID();
+    while (occurrence <= limite) {
+        nombreOccurrences++;
 
-
-    const duree =
-        finInitial.getTime() -
-        debutInitial.getTime();
-
-
-    const reservations = [];
-
-    let occurrence =
-        new Date(
-            debutInitial
-        );
-
-
-    while (
-        occurrence <= limite
-    ) {
-
-        if (
-            reservations.length >=
-            104
-        ) {
-
+        if (nombreOccurrences > 104) {
             throw new Error(
                 "Une série ne peut pas dépasser 104 réservations."
             );
         }
 
-
-        const finOccurrence =
-            new Date(
-                occurrence.getTime() +
-                duree
-            );
-
-
-        reservations.push({
-            ...base,
-
-            date_debut:
-                serialiserDate(
-                    occurrence
-                ),
-
-            date_fin:
-                serialiserDate(
-                    finOccurrence
-                ),
-
-            serie_id:
-                serieId
-        });
-
-
-        const suivante =
-            new Date(
-                occurrence
-            );
-
-        suivante.setDate(
-            suivante.getDate() + 7
+        occurrence.setDate(
+            occurrence.getDate() + 7
         );
-
-        occurrence =
-            suivante;
     }
 
+    // Une seule ligne en attente, même si la série
+    // contient plusieurs semaines.
+    return [{
+        ...base,
 
-    return reservations;
+        date_debut: serialiserDate(debutInitial),
+        date_fin: serialiserDate(finInitial),
+
+        serie_id: crypto.randomUUID(),
+
+        date_fin_repetition: serialiserDate(limite)
+    }];
 }
 
 
@@ -880,6 +807,8 @@ async function envoyerDemande(
 
         verifierFormulaire();
 
+        const estRepetition =
+            reservationRepetitive.checked;
 
         const reservations =
             creerReservations();
@@ -933,7 +862,7 @@ async function envoyerDemande(
         afficherMessage(
             nombreDemandes === 1
                 ? "Votre demande a été envoyée et attend la validation d'un administrateur."
-                : `${nombreDemandes} demandes ont été envoyées et attendent la validation d'un administrateur.`
+                : `Votre demande hebdomadaire comprenant ${nombreDemandes} réservations a été envoyée. Un administrateur validera la série en une seule fois.`
         );
 
 

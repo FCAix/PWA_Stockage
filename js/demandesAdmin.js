@@ -320,7 +320,7 @@ function creerCarte(
 
 
     const occurrences = demande._occurrences ?? [demande];
-    
+
     const dates =
         document.createElement(
             "p"
@@ -694,74 +694,39 @@ function afficherDemandes(
 // CONFIRMATION
 // ======================================================
 
-async function confirmerReservation(
-    type,
-    id,
-    serieId = null,
-    nombreOccurrences = 1
-) {
+async function confirmerReservation(type, id) {
 
-    const configuration =
-        obtenirConfigurationReservation(type);
-
-    if (!configuration) {
+    if (!obtenirConfigurationReservation(type)) {
         return;
     }
 
-    const messageConfirmation = serieId
-        ? `Confirmer les ${nombreOccurrences} réservations de cette série ?`
-        : "Confirmer cette réservation ?";
-
-    if (!confirm(messageConfirmation)) {
+    if (!confirm(
+        "Confirmer cette demande ? Si elle est hebdomadaire, toutes les occurrences seront créées et confirmées."
+    )) {
         return;
     }
 
     try {
 
-        let requete = supabase
-            .from(configuration.tableReservations)
-            .update({
-                statut: "confirme",
-                confirmee_par: admin.id,
-                confirmee_par_nom: nomAdmin,
-                confirmee_at: new Date().toISOString()
-            })
-            .eq("statut", "attente");
-
-        if (serieId) {
-            requete = requete.eq("serie_id", serieId);
-        } else {
-            requete = requete.eq("id", id);
-        }
-
-        const { data, error } =
-            await requete.select("id");
+        const { data, error } = await supabase.rpc(
+            "confirmer_serie_reservation",
+            {
+                p_type: type,
+                p_reservation_id: id
+            }
+        );
 
         if (error) {
             throw error;
         }
 
-        if (!data || data.length === 0) {
-            alert(
-                "Aucune réservation en attente n'a été trouvée."
-            );
-            return;
-        }
-
-        // Synchroniser chaque occurrence confirmée avec Google Calendar.
-        // Plusieurs événements distincts seront donc conservés.
-        for (let i = 0; i < data.length; i += 5) {
-
-            const lot = data.slice(i, i + 5);
-
-            await Promise.all(
-                lot.map(reservation =>
-                    synchroniserGoogle(
-                        reservation.id,
-                        type,
-                        "create"
-                    )
-                )
+        // La fonction SQL renvoie l'identifiant
+        // de chaque réservation confirmée ou créée.
+        for (const ligne of (data ?? [])) {
+            await synchroniserGoogle(
+                ligne.reservation_id,
+                type,
+                "create"
             );
         }
 
@@ -775,15 +740,12 @@ async function confirmerReservation(
         );
 
         if (error.code === "23P01") {
-
             alert(
-                "Impossible de confirmer cette série : au moins une occurrence entre en conflit avec une autre réservation. Aucune occurrence de la série n'a été confirmée."
+                "Une occurrence de cette série entre en conflit avec une autre réservation. La série entière a été annulée."
             );
-
         } else {
-
             alert(
-                `Impossible de confirmer la réservation : ${error.message}`
+                `Impossible de confirmer la demande : ${error.message}`
             );
         }
     }
