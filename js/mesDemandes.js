@@ -4,6 +4,9 @@ import { requireAuth } from "./authGuard.js";
 import {
     obtenirTypesReservation
 } from "./reservationsConfig.js";
+import {regrouperSeriesEnAttente} from "./demandesAdmin.js";
+import {creerCarte} from "./demandesAdmin.js";
+
 
 
 const auth = await requireAuth([
@@ -212,6 +215,10 @@ function afficherDemandes(
     let nombreConfirmees = 0;
     let nombreHistorique = 0;
 
+    const demandesAffichage =
+        regrouperSeriesEnAttente(demandes);
+
+         
 
     demandes.forEach(
         demande => {
@@ -273,160 +280,7 @@ function afficherDemandes(
 }
 
 
-function creerCarte(
-    demande
-) {
 
-    const article =
-        document.createElement(
-            "article"
-        );
-
-    article.className =
-        "carte-demande";
-
-
-    const titre =
-        document.createElement(
-            "h3"
-        );
-
-    titre.textContent =
-        `${demande._typeLibelle} — ${demande._ressource}`;
-
-
-    const nom =
-        document.createElement(
-            "p"
-        );
-
-    nom.textContent =
-        `Réservation : ${demande.nom_reservation}`;
-
-
-    const responsable =
-        document.createElement(
-            "p"
-        );
-
-    responsable.textContent =
-        `Responsable : ${demande.responsable}`;
-
-
-    const dates =
-        document.createElement(
-            "p"
-        );
-
-    dates.textContent =
-        `Du ${formaterDate(demande.date_debut, demande._modeDate)} au ${formaterDate(demande.date_fin, demande._modeDate)}`;
-
-
-    const statut =
-        document.createElement(
-            "p"
-        );
-
-    statut.classList.add(
-        "statut-demande",
-        `statut-${demande.statut}`
-    );
-
-    statut.textContent =
-        obtenirLibelleStatut(
-            demande.statut
-        );
-
-
-    article.append(
-        titre,
-        nom,
-        responsable,
-        dates,
-        statut
-    );
-
-
-    if (
-        demande.nombre_passagers
-    ) {
-
-        ajouterTexte(
-            article,
-            `Passagers : ${demande.nombre_passagers}`
-        );
-    }
-
-
-    if (demande.destination) {
-
-        ajouterTexte(
-            article,
-            `Destination : ${demande.destination}`
-        );
-    }
-
-
-    if (
-        demande.confirmee_par_nom
-    ) {
-
-        ajouterTexte(
-            article,
-            `Confirmée par ${demande.confirmee_par_nom} le ${formaterDate(demande.confirmee_at, "datetime-local")}`
-        );
-    }
-
-
-    if (
-        demande.retour_confirme_par_nom
-    ) {
-
-        ajouterTexte(
-            article,
-            `Retour confirmé par ${demande.retour_confirme_par_nom} le ${formaterDate(demande.retour_confirme_at, "datetime-local")}`
-        );
-    }
-
-
-    if (
-        demande.statut ===
-            "confirme" &&
-        dateRetourPassee(
-            demande
-        )
-    ) {
-
-        const retour =
-            document.createElement(
-                "p"
-            );
-
-        retour.className =
-            "retour-en-attente";
-
-        retour.textContent =
-            "Retour en attente de confirmation par un administrateur.";
-
-        article.appendChild(
-            retour
-        );
-    }
-
-
-    if (
-        demande.motif_refus
-    ) {
-
-        ajouterTexte(
-            article,
-            `Motif du refus : ${demande.motif_refus}`
-        );
-    }
-
-
-    return article;
-}
 
 
 function ajouterTexte(

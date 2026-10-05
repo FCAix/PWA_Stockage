@@ -230,6 +230,54 @@ async function chargerDemandes() {
 // ======================================================
 // CARTE
 // ======================================================
+function regrouperSeriesEnAttente(demandes) {
+
+    const resultat = [];
+    const groupes = new Map();
+
+    for (const demande of demandes) {
+
+        // Les réservations sans répétition et celles déjà
+        // confirmées restent des réservations individuelles.
+        if (
+            demande.statut !== "attente" ||
+            !demande.serie_id
+        ) {
+            resultat.push(demande);
+            continue;
+        }
+
+        const cle =
+            `${demande._type}:${demande.serie_id}`;
+
+        let groupe = groupes.get(cle);
+
+        if (!groupe) {
+
+            groupe = {
+                ...demande,
+                _occurrences: []
+            };
+
+            groupes.set(cle, groupe);
+            resultat.push(groupe);
+        }
+
+        groupe._occurrences.push(demande);
+    }
+
+    // Afficher les occurrences dans l'ordre chronologique.
+    for (const groupe of groupes.values()) {
+
+        groupe._occurrences.sort(
+            (a, b) =>
+                new Date(a.date_debut) -
+                new Date(b.date_debut)
+        );
+    }
+
+    return resultat;
+}
 
 function creerCarte(
     demande
@@ -271,14 +319,18 @@ function creerCarte(
         `Responsable : ${demande.responsable}`;
 
 
-    const dates =
-        document.createElement(
-            "p"
-        );
+    const occurrences = demande._occurrences ?? [demande];
 
     dates.textContent =
-        `Du ${formaterDate(demande.date_debut, demande._modeDate)} au ${formaterDate(demande.date_fin, demande._modeDate)}`;
-
+        occurrences.length > 1
+            ? `Demande hebdomadaire — ${occurrences.length} réservations`
+            : `Du ${formaterDate(
+                demande.date_debut,
+                demande._modeDate
+            )} au ${formaterDate(
+                demande.date_fin,
+                demande._modeDate
+            )}`;
 
     const statut =
         document.createElement(
@@ -303,6 +355,41 @@ function creerCarte(
         dates,
         statut
     );
+
+    if (occurrences.length > 1) {
+
+        const details =
+            document.createElement("details");
+
+        const resume =
+            document.createElement("summary");
+
+        resume.textContent =
+            "Afficher les dates de la série";
+
+        const liste =
+            document.createElement("ul");
+
+        for (const occurrence of occurrences) {
+
+            const element =
+                document.createElement("li");
+
+            element.textContent =
+                `Du ${formaterDate(
+                    occurrence.date_debut,
+                    occurrence._modeDate
+                )} au ${formaterDate(
+                    occurrence.date_fin,
+                    occurrence._modeDate
+                )}`;
+
+            liste.appendChild(element);
+        }
+
+        details.append(resume, liste);
+        article.appendChild(details);
+    }
 
 
     if (demande.telephone) {
@@ -462,6 +549,14 @@ function creerBouton(
         `bouton-${action}`
     );
 
+    bouton.dataset.serieId =
+        demande.serie_id ?? "";
+
+    bouton.dataset.nombreOccurrences =
+        String(
+            demande._occurrences?.length ?? 1
+        );
+
 
     return bouton;
 }
@@ -503,6 +598,7 @@ function afficherDemandes(
     let totalRetours = 0;
     let totalHistorique = 0;
 
+    const demandesAffichage = regrouperSeriesEnAttente(demandes);
 
     demandes.forEach(
         demande => {
@@ -595,94 +691,97 @@ function afficherDemandes(
 
 async function confirmerReservation(
     type,
-    id
+    id,
+    serieId = null,
+    nombreOccurrences = 1
 ) {
 
     const configuration =
-        obtenirConfigurationReservation(
-            type
-        );
-
+        obtenirConfigurationReservation(type);
 
     if (!configuration) {
         return;
     }
 
+    const messageConfirmation = serieId
+        ? `Confirmer les ${nombreOccurrences} réservations de cette série ?`
+        : "Confirmer cette réservation ?";
 
-    if (
-        !confirm(
-            "Confirmer cette réservation ?"
-        )
-    ) {
+    if (!confirm(messageConfirmation)) {
         return;
     }
 
+    try {
 
-    const {
-        error
-    } = await supabase
-        .from(
-            configuration
-                .tableReservations
-        )
-        .update({
+        let requete = supabase
+            .from(configuration.tableReservations)
+            .update({
+                statut: "confirme",
+                confirmee_par: admin.id,
+                confirmee_par_nom: nomAdmin,
+                confirmee_at: new Date().toISOString()
+            })
+            .eq("statut", "attente");
 
-            statut:
-                "confirme",
+        if (serieId) {
+            requete = requete.eq("serie_id", serieId);
+        } else {
+            requete = requete.eq("id", id);
+        }
 
-            confirmee_par:
-                admin.id,
+        const { data, error } =
+            await requete.select("id");
 
-            confirmee_par_nom:
-                nomAdmin,
+        if (error) {
+            throw error;
+        }
 
-            confirmee_at:
-                new Date()
-                    .toISOString()
-        })
-        .eq(
-            "id",
-            id
-        )
-        .eq(
-            "statut",
-            "attente"
+        if (!data || data.length === 0) {
+            alert(
+                "Aucune réservation en attente n'a été trouvée."
+            );
+            return;
+        }
+
+        // Synchroniser chaque occurrence confirmée avec Google Calendar.
+        // Plusieurs événements distincts seront donc conservés.
+        for (let i = 0; i < data.length; i += 5) {
+
+            const lot = data.slice(i, i + 5);
+
+            await Promise.all(
+                lot.map(reservation =>
+                    synchroniserGoogle(
+                        reservation.id,
+                        type,
+                        "create"
+                    )
+                )
+            );
+        }
+
+        await chargerDemandes();
+
+    } catch (error) {
+
+        console.error(
+            "Erreur de confirmation :",
+            error
         );
 
-
-    if (error) {
-
-        console.error(error);
-
-
-        if (
-            error.code ===
-            "23P01"
-        ) {
+        if (error.code === "23P01") {
 
             alert(
-                "Impossible de confirmer : cet élément est déjà réservé sur cette période."
+                "Impossible de confirmer cette série : au moins une occurrence entre en conflit avec une autre réservation. Aucune occurrence de la série n'a été confirmée."
             );
 
         } else {
 
             alert(
-                "Impossible de confirmer la réservation."
+                `Impossible de confirmer la réservation : ${error.message}`
             );
         }
-
-        return;
     }
-
-
-    await synchroniserGoogle(
-        id,
-        type,
-        "create"
-    );
-
-
-    await chargerDemandes();
 }
 
 
@@ -692,67 +791,71 @@ async function confirmerReservation(
 
 async function refuserReservation(
     type,
-    id
+    id,
+    serieId = null,
+    nombreOccurrences = 1
 ) {
 
     const configuration =
-        obtenirConfigurationReservation(
-            type
-        );
+        obtenirConfigurationReservation(type);
 
-
-    const motif =
-        prompt(
-            "Motif du refus :"
-        );
-
-
-    if (
-        motif === null
-    ) {
+    if (!configuration) {
         return;
     }
 
+    const motif = prompt(
+        serieId
+            ? `Motif du refus des ${nombreOccurrences} réservations :`
+            : "Motif du refus :"
+    );
 
-    const {
-        error
-    } = await supabase
-        .from(
-            configuration
-                .tableReservations
-        )
-        .update({
+    if (motif === null) {
+        return;
+    }
 
-            statut:
-                "refusee",
+    try {
 
-            motif_refus:
-                motif.trim() ||
-                null
-        })
-        .eq(
-            "id",
-            id
-        )
-        .eq(
-            "statut",
-            "attente"
+        let requete = supabase
+            .from(configuration.tableReservations)
+            .update({
+                statut: "refusee",
+                motif_refus: motif.trim() || null
+            })
+            .eq("statut", "attente");
+
+        if (serieId) {
+            requete = requete.eq("serie_id", serieId);
+        } else {
+            requete = requete.eq("id", id);
+        }
+
+        const { data, error } =
+            await requete.select("id");
+
+        if (error) {
+            throw error;
+        }
+
+        if (!data || data.length === 0) {
+            alert(
+                "Aucune demande en attente n'a été trouvée."
+            );
+            return;
+        }
+
+        await chargerDemandes();
+
+    } catch (error) {
+
+        console.error(
+            "Erreur de refus :",
+            error
         );
-
-
-    if (error) {
-
-        console.error(error);
 
         alert(
-            "Impossible de refuser la demande."
+            `Impossible de refuser la demande : ${error.message}`
         );
-
-        return;
     }
-
-
-    await chargerDemandes();
 }
 
 
@@ -931,8 +1034,16 @@ document.addEventListener(
         const {
             action,
             id,
-            type
+            type,
+            serieId,
+            nombreOccurrences
         } = bouton.dataset;
+
+        const identifiantSerie =
+            serieId || null;
+
+        const nombre =
+            Number(nombreOccurrences || 1);
 
 
         bouton.disabled =
