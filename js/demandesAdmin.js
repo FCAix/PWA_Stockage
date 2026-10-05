@@ -279,6 +279,139 @@ function regrouperSeriesEnAttente(demandes) {
     return resultat;
 }
 
+function calculerOccurrencesSerie(demande) {
+
+    // Une réservation sans répétition
+    // conserve son affichage habituel.
+    if (
+        !demande.serie_id ||
+        !demande.date_fin_repetition
+    ) {
+        return null;
+    }
+
+    const modeDate = demande._modeDate === "date";
+
+    let debut;
+    let fin;
+    let limite;
+    let duree;
+
+    if (modeDate) {
+
+        // Tonnelles : dates sans horaires.
+        debut = new Date(
+            `${demande.date_debut}T00:00:00Z`
+        );
+
+        fin = new Date(
+            `${demande.date_fin}T00:00:00Z`
+        );
+
+        limite = new Date(
+            `${demande.date_fin_repetition}T23:59:59Z`
+        );
+
+        duree = Math.round(
+            (fin.getTime() - debut.getTime()) /
+            86400000
+        );
+
+    } else {
+
+        // Matériel et minibus : dates avec horaires.
+        debut = new Date(demande.date_debut);
+        fin = new Date(demande.date_fin);
+        limite = new Date(demande.date_fin_repetition);
+
+        duree =
+            fin.getTime() - debut.getTime();
+    }
+
+    if (
+        Number.isNaN(debut.getTime()) ||
+        Number.isNaN(fin.getTime()) ||
+        Number.isNaN(limite.getTime()) ||
+        debut > limite ||
+        duree < 0
+    ) {
+        return null;
+    }
+
+    const occurrences = [];
+    let occurrence = new Date(debut);
+
+    while (occurrence <= limite) {
+
+        if (occurrences.length >= 104) {
+            throw new Error(
+                "La série dépasse la limite de 104 réservations."
+            );
+        }
+
+        const finOccurrence = modeDate
+            ? new Date(
+                occurrence.getTime() +
+                duree * 86400000
+            )
+            : new Date(
+                occurrence.getTime() + duree
+            );
+
+        occurrences.push({
+            debut: new Date(occurrence),
+            fin: finOccurrence
+        });
+
+        if (modeDate) {
+
+            occurrence = new Date(
+                occurrence.getTime() +
+                7 * 86400000
+            );
+
+        } else {
+
+            // Ajouter 7 jours calendaires en conservant
+            // l'heure locale malgré les changements d'heure.
+            occurrence.setDate(
+                occurrence.getDate() + 7
+            );
+        }
+    }
+
+    return occurrences;
+}
+
+function formaterDateOccurrence(date, mode) {
+
+    if (mode === "date") {
+
+        const annee =
+            date.getUTCFullYear();
+
+        const mois =
+            String(
+                date.getUTCMonth() + 1
+            ).padStart(2, "0");
+
+        const jour =
+            String(
+                date.getUTCDate()
+            ).padStart(2, "0");
+
+        return formaterDate(
+            `${annee}-${mois}-${jour}`,
+            "date"
+        );
+    }
+
+    return formaterDate(
+        date.toISOString(),
+        mode
+    );
+}
+
 function creerCarte(
     demande
 ) {
@@ -319,23 +452,32 @@ function creerCarte(
         `Responsable : ${demande.responsable}`;
 
 
-    const occurrences = demande._occurrences ?? [demande];
+    const occurrences = calculerOccurrencesSerie(demande);
 
     const dates =
         document.createElement(
             "p"
         );
 
-    dates.textContent =
-        occurrences.length > 1
-            ? `Demande hebdomadaire — ${occurrences.length} réservations`
-            : `Du ${formaterDate(
+    if (occurrences) {
+
+        const nombre =
+            occurrences.length;
+
+        dates.textContent =
+            `Série hebdomadaire : ${nombre} réservation${nombre > 1 ? "s" : ""} à valider`;
+
+    } else {
+
+        dates.textContent =
+            `Du ${formaterDate(
                 demande.date_debut,
                 demande._modeDate
             )} au ${formaterDate(
                 demande.date_fin,
                 demande._modeDate
             )}`;
+    }
 
     const statut =
         document.createElement(
@@ -361,38 +503,54 @@ function creerCarte(
         statut
     );
 
-    if (occurrences.length > 1) {
+    if (
+        occurrences &&
+        occurrences.length > 0
+    ) {
 
         const details =
             document.createElement("details");
+
+        details.className =
+            "dates-serie-reservation";
 
         const resume =
             document.createElement("summary");
 
         resume.textContent =
-            "Afficher les dates de la série";
+            `Afficher les ${occurrences.length} dates`;
 
         const liste =
-            document.createElement("ul");
+            document.createElement("ol");
 
-        for (const occurrence of occurrences) {
+        occurrences.forEach(
+            (occurrence, index) => {
 
-            const element =
-                document.createElement("li");
+                const element =
+                    document.createElement("li");
 
-            element.textContent =
-                `Du ${formaterDate(
-                    occurrence.date_debut,
-                    occurrence._modeDate
-                )} au ${formaterDate(
-                    occurrence.date_fin,
-                    occurrence._modeDate
-                )}`;
+                element.textContent =
+                    `${index + 1}. Du ${
+                        formaterDateOccurrence(
+                            occurrence.debut,
+                            demande._modeDate
+                        )
+                    } au ${
+                        formaterDateOccurrence(
+                            occurrence.fin,
+                            demande._modeDate
+                        )
+                    }`;
 
-            liste.appendChild(element);
-        }
+                liste.appendChild(element);
+            }
+        );
 
-        details.append(resume, liste);
+        details.append(
+            resume,
+            liste
+        );
+
         article.appendChild(details);
     }
 
@@ -480,15 +638,23 @@ function creerCarte(
             "actions-demande";
 
 
+        const nombreOccurrences =
+            occurrences?.length ?? 1;
+
         actions.append(
+
             creerBouton(
-                "Confirmer",
+                nombreOccurrences > 1
+                    ? `Confirmer les ${nombreOccurrences} réservations`
+                    : "Confirmer",
                 "confirmer",
                 demande
             ),
 
             creerBouton(
-                "Refuser",
+                nombreOccurrences > 1
+                    ? `Refuser les ${nombreOccurrences} réservations`
+                    : "Refuser",
                 "refuser",
                 demande
             )
