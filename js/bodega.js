@@ -2457,57 +2457,95 @@ async function chargerHistoriqueLivraisons() {
                 "Fournisseur non renseigné";
 
 
+            // Bouton Voir la fiche
             const bouton =
-                document.createElement(
-                    "button"
-                );
-
-            bouton.type =
-                "button";
-
-            bouton.textContent =
-                "Voir la fiche";
-
-            bouton.dataset.action =
-                "fiche-livraison";
-
-            bouton.dataset.id =
-                livraison.id;
-
-            const boutonModifier =
                 document.createElement("button");
 
-            boutonModifier.type =
-                "button";
-
-            boutonModifier.textContent =
-                "Modifier";
-
-            boutonModifier.dataset.action =
-                "modifier-livraison";
-
-            boutonModifier.dataset.id =
-                livraison.id;
+            bouton.type = "button";
+            bouton.textContent = "Voir la fiche";
+            bouton.dataset.action = "fiche-livraison";
+            bouton.dataset.id = livraison.id;
 
 
+            // Conteneur des actions
             const actions =
-                document.createElement(
-                    "div"
-                );
+                document.createElement("div");
 
             actions.className =
                 "actions-operation-bodega";
 
+            actions.appendChild(bouton);
 
-            actions.append(
-                bouton,
-                boutonModifier
-            );
+
+            // Statut de la livraison
+            const badgeStatut =
+                document.createElement("span");
+
+            badgeStatut.className =
+                "badge-operation";
+
+            if (livraison.statut === "annulee") {
+
+                badgeStatut.classList.add(
+                    "badge-operation-annulee"
+                );
+
+                badgeStatut.textContent =
+                    "Annulée";
+
+            } else {
+
+                badgeStatut.classList.add(
+                    "badge-operation-active"
+                );
+
+                badgeStatut.textContent =
+                    "Enregistrée";
+            }
+
+
+            // Boutons uniquement pour une livraison active
+            if (livraison.statut !== "annulee") {
+
+                const boutonModifier =
+                    document.createElement("button");
+
+                boutonModifier.type = "button";
+                boutonModifier.textContent = "Modifier";
+                boutonModifier.dataset.action = "modifier-livraison";
+                boutonModifier.dataset.id = livraison.id;
+
+
+                const boutonSupprimer =
+                    document.createElement("button");
+
+                boutonSupprimer.type = "button";
+                boutonSupprimer.textContent = "Supprimer";
+
+                boutonSupprimer.className =
+                    "bouton-supprimer-operation";
+
+                boutonSupprimer.dataset.action =
+                    "supprimer-livraison";
+
+                boutonSupprimer.dataset.id =
+                    livraison.id;
+
+                boutonSupprimer.dataset.reference =
+                    livraison.reference;
+
+
+                actions.append(
+                    boutonModifier,
+                    boutonSupprimer
+                );
+            }
 
 
             article.append(
                 zone,
                 fournisseur,
+                badgeStatut,
                 actions
             );
 
