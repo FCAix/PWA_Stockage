@@ -1996,3 +1996,52 @@ tbody tr:hover {
     }
 
 }
+/* Statut des opérations Bodega */
+
+.badge-operation {
+    display: inline-flex;
+    align-self: flex-start;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge-operation-active {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.badge-operation-annulee {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+
+/* Bouton suppression */
+
+.bouton-supprimer-operation {
+    background: #dc2626 !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+.bouton-supprimer-operation:hover {
+    background: #b91c1c !important;
+}
+
+.actions-operation-bodega {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 600px) {
+    .actions-operation-bodega {
+        flex-direction: column;
+    }
+
+    .actions-operation-bodega button {
+        width: 100%;
+    }
+}
