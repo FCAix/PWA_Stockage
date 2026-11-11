@@ -66,6 +66,11 @@ const dateLivraison =
         "#date-livraison"
     );
 
+const dateModificationLivraison =
+    document.querySelector(
+        "#modifier-date-livraison"
+    );
+
 
 const dialogModifierLivraison =
     document.querySelector(
