@@ -2151,7 +2151,9 @@ async function chargerHistoriqueVentes() {
             reference,
             total_recette,
             date_operation,
-            created_by_name
+            created_by_name,
+            statut,
+            annulee_at
         `)
         .order(
             "date_operation",
@@ -2246,57 +2248,97 @@ async function chargerHistoriqueVentes() {
                 );
 
 
+            // Bouton Voir la fiche
             const bouton =
-                document.createElement(
-                    "button"
-                );
-
-            bouton.type =
-                "button";
-
-            bouton.textContent =
-                "Voir la fiche";
-
-            bouton.dataset.action =
-                "fiche-vente";
-
-            bouton.dataset.id =
-                vente.id;
-
-
-            const boutonModifier =
                 document.createElement("button");
 
-            boutonModifier.type =
-                "button";
-
-            boutonModifier.textContent =
-                "Modifier";
-
-            boutonModifier.dataset.action =
-                "modifier-vente";
-
-            boutonModifier.dataset.id =
-                vente.id;
+            bouton.type = "button";
+            bouton.textContent = "Voir la fiche";
+            bouton.dataset.action = "fiche-vente";
+            bouton.dataset.id = vente.id;
 
 
+            // Conteneur des actions
             const actions =
                 document.createElement("div");
 
             actions.className =
                 "actions-operation-bodega";
 
-            actions.append(
-                bouton,
-                boutonModifier
-            );
+            actions.appendChild(bouton);
+
+
+            // Statut de la vente
+            const badgeStatut =
+                document.createElement("span");
+
+            badgeStatut.className =
+                "badge-operation";
+
+            if (vente.statut === "annulee") {
+
+                badgeStatut.classList.add(
+                    "badge-operation-annulee"
+                );
+
+                badgeStatut.textContent =
+                    "Annulée";
+
+            } else {
+
+                badgeStatut.classList.add(
+                    "badge-operation-active"
+                );
+
+                badgeStatut.textContent =
+                    "Validée";
+            }
+
+
+            // Boutons disponibles uniquement si la vente est active
+            if (vente.statut !== "annulee") {
+
+                const boutonModifier =
+                    document.createElement("button");
+
+                boutonModifier.type = "button";
+                boutonModifier.textContent = "Modifier";
+                boutonModifier.dataset.action = "modifier-vente";
+                boutonModifier.dataset.id = vente.id;
+
+
+                const boutonSupprimer =
+                    document.createElement("button");
+
+                boutonSupprimer.type = "button";
+                boutonSupprimer.textContent = "Supprimer";
+
+                boutonSupprimer.className =
+                    "bouton-supprimer-operation";
+
+                boutonSupprimer.dataset.action =
+                    "supprimer-vente";
+
+                boutonSupprimer.dataset.id =
+                    vente.id;
+
+                boutonSupprimer.dataset.reference =
+                    vente.reference;
+
+
+                actions.append(
+                    boutonModifier,
+                    boutonSupprimer
+                );
+            }
+
 
             article.append(
                 zone,
                 total,
+                badgeStatut,
                 actions
             );
-
 
             listeVentes.appendChild(
                 article
@@ -2544,6 +2586,123 @@ async function gererClicHistorique(
             bouton.dataset.id
         );
     }
+    if (
+        bouton.dataset.action === "supprimer-vente"
+    ) {
+
+        await supprimerVenteBodega(
+            bouton.dataset.id,
+            bouton.dataset.reference
+        );
+
+        return;
+    }
+
+
+    if (
+        bouton.dataset.action === "supprimer-livraison"
+    ) {
+
+        await supprimerLivraisonBodega(
+            bouton.dataset.id,
+            bouton.dataset.reference
+        );
+
+        return;
+    }
+}
+
+
+async function supprimerVenteBodega(id, reference) {
+
+    const confirmation = window.confirm(
+        `Voulez-vous vraiment supprimer la vente ${reference} ?\n\n` +
+        `Les produits vendus seront restitués au stock. ` +
+        `La fiche restera conservée dans l'historique avec le statut ANNULÉE.`
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    try {
+
+        const { data, error } =
+            await supabase.rpc(
+                "annuler_vente_bodega",
+                {
+                    p_vente_id: id
+                }
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        await chargerBodega();
+
+        alert(
+            `La vente ${reference} a été annulée. Les produits ont été restitués au stock.`
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Erreur annulation vente :",
+            error
+        );
+
+        alert(
+            `Impossible d'annuler la vente : ${error.message}`
+        );
+    }
+}
+
+
+async function supprimerLivraisonBodega(id, reference) {
+
+    const confirmation = window.confirm(
+        `Voulez-vous vraiment supprimer la livraison ${reference} ?\n\n` +
+        `Les quantités reçues seront retirées du stock. ` +
+        `La fiche restera conservée dans l'historique avec le statut ANNULÉE.\n\n` +
+        `L'opération sera refusée si le stock disponible est insuffisant.`
+    );
+
+    if (!confirmation) {
+        return;
+    }
+
+    try {
+
+        const { data, error } =
+            await supabase.rpc(
+                "annuler_livraison_bodega",
+                {
+                    p_livraison_id: id
+                }
+            );
+
+        if (error) {
+            throw error;
+        }
+
+        await chargerBodega();
+
+        alert(
+            `La livraison ${reference} a été annulée. Les quantités ont été retirées du stock.`
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Erreur annulation livraison :",
+            error
+        );
+
+        alert(
+            `Impossible d'annuler la livraison : ${error.message}`
+        );
+    }
 }
 
 
@@ -2611,7 +2770,9 @@ async function ouvrirFicheVente(
     document.querySelector(
         "#fiche-vente-reference"
     ).textContent =
-        vente.reference;
+        vente.statut === "annulee"
+            ? `${vente.reference} — ANNULÉE`
+            : vente.reference;
 
 
     document.querySelector(
@@ -3391,7 +3552,9 @@ async function ouvrirFicheLivraison(
     document.querySelector(
         "#fiche-livraison-reference"
     ).textContent =
-        livraison.reference;
+        livraison.statut === "annulee"
+            ? `${livraison.reference} — ANNULÉE`
+            : livraison.reference;
 
 
     document.querySelector(
@@ -3508,7 +3671,8 @@ async function chargerResumeRecettes() {
         .gte(
             "date_operation",
             debutMois.toISOString()
-        );
+        )
+        .eq("statut", "active");
 
 
     if (error) {
