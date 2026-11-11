@@ -667,7 +667,7 @@ function afficherProduits(
                 "quantite-stock";
 
             quantite.textContent =
-                `${produit.cantidad} ${produit.unidad ?? ""}`;
+                `${produit.cantidad} `;
 
 
             haut.append(
