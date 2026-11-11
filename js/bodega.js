@@ -2366,7 +2366,10 @@ async function chargerHistoriqueLivraisons() {
             reference,
             fournisseur,
             date_livraison,
-            created_by_name
+            created_by_name,
+            statut,
+            annulee_at,
+            annulee_par_nom
         `)
         .order(
             "date_livraison",
