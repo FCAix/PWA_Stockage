@@ -1957,3 +1957,42 @@ tbody tr:hover {
 .dates-serie-reservation li {
     margin: 6px 0;
 }
+
+/* =====================================================
+   MODIFICATION VENTES
+   ===================================================== */
+
+.zone-edition-vente {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+}
+
+.champ-edition-vente {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.champ-edition-vente label {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.champ-edition-vente input {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+}
+
+@media (max-width: 600px) {
+
+    .zone-edition-vente {
+        grid-template-columns: 1fr;
+    }
+
+}

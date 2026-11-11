@@ -273,6 +273,48 @@ const dialogFicheVente =
         "#dialog-fiche-vente"
     );
 
+// MODIFICATION VENTE
+
+const dialogModifierVente =
+    document.querySelector(
+        "#dialog-modifier-vente"
+    );
+
+const formulaireModifierVente =
+    document.querySelector(
+        "#form-modifier-vente"
+    );
+
+const produitsModificationVente =
+    document.querySelector(
+        "#produits-modification-vente"
+    );
+
+const messageModifierVente =
+    document.querySelector(
+        "#message-modifier-vente"
+    );
+
+const boutonFermerModificationVente =
+    document.querySelector(
+        "#bouton-fermer-modification-vente"
+    );
+
+const boutonAnnulerModificationVente =
+    document.querySelector(
+        "#bouton-annuler-modification-vente"
+    );
+
+const boutonEnregistrerModificationVente =
+    document.querySelector(
+        "#bouton-enregistrer-modification-vente"
+    );
+
+const totalModificationVente =
+    document.querySelector(
+        "#total-modification-vente"
+    );
+
 
 // FICHE LIVRAISON
 
@@ -366,6 +408,26 @@ boutonAnnulerVente.addEventListener(
 formulaireVente.addEventListener(
     "submit",
     enregistrerVente
+);
+
+boutonFermerModificationVente.addEventListener(
+    "click",
+    fermerModificationVente
+);
+
+boutonAnnulerModificationVente.addEventListener(
+    "click",
+    fermerModificationVente
+);
+
+formulaireModifierVente.addEventListener(
+    "submit",
+    enregistrerModificationVente
+);
+
+produitsModificationVente.addEventListener(
+    "input",
+    calculerTotalModificationVente
 );
 
 produitsVente.addEventListener(
@@ -2202,10 +2264,37 @@ async function chargerHistoriqueVentes() {
                 vente.id;
 
 
+            const boutonModifier =
+                document.createElement("button");
+
+            boutonModifier.type =
+                "button";
+
+            boutonModifier.textContent =
+                "Modifier";
+
+            boutonModifier.dataset.action =
+                "modifier-vente";
+
+            boutonModifier.dataset.id =
+                vente.id;
+
+
+            const actions =
+                document.createElement("div");
+
+            actions.className =
+                "actions-operation-bodega";
+
+            actions.append(
+                bouton,
+                boutonModifier
+            );
+
             article.append(
                 zone,
                 total,
-                bouton
+                actions
             );
 
 
@@ -2418,6 +2507,14 @@ async function gererClicHistorique(
         );
     }
 
+    if (bouton.dataset.action === "modifier-vente") {
+
+        await ouvrirModificationVente(
+            bouton.dataset.id
+        );
+
+    }
+
 
     if (
         bouton.dataset.action ===
@@ -2434,6 +2531,16 @@ async function gererClicHistorique(
     ) {
 
         await ouvrirModificationLivraison(
+            bouton.dataset.id
+        );
+    }
+
+    if (
+        bouton.dataset.action ===
+        "modifier-vente"
+    ) {
+
+        await ouvrirModificationVente(
             bouton.dataset.id
         );
     }
@@ -2583,6 +2690,640 @@ async function ouvrirFicheVente(
 
 
     dialogFicheVente.showModal();
+}
+
+
+// ======================================================
+// MODIFIER UNE VENTE
+// ======================================================
+
+async function ouvrirModificationVente(venteId) {
+
+    try {
+
+        const [
+            venteResultat,
+            lignesResultat
+        ] = await Promise.all([
+
+            supabase
+                .from("bodega_ventes")
+                .select("*")
+                .eq("id", venteId)
+                .single(),
+
+            supabase
+                .from("bodega_vente_lignes")
+                .select("*")
+                .eq("vente_id", venteId)
+
+        ]);
+
+
+        if (venteResultat.error) {
+            throw venteResultat.error;
+        }
+
+        if (lignesResultat.error) {
+            throw lignesResultat.error;
+        }
+
+
+        // Actualiser le stock avant de construire le formulaire.
+        await chargerProduits();
+
+
+        const vente = venteResultat.data;
+
+
+        document.querySelector(
+            "#modifier-vente-id"
+        ).value = vente.id;
+
+
+        document.querySelector(
+            "#modifier-reference-vente"
+        ).value = vente.reference;
+
+
+        document.querySelector(
+            "#modifier-date-vente"
+        ).value = convertirDateHeureLocale(
+            vente.date_operation
+        );
+
+
+        document.querySelector(
+            "#modifier-notes-vente"
+        ).value = vente.notes ?? "";
+
+
+        messageModifierVente.textContent = "";
+
+
+        construireProduitsModificationVente(
+            lignesResultat.data ?? []
+        );
+
+
+        dialogModifierVente.showModal();
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur ouverture modification vente :",
+            error
+        );
+
+        alert(
+            `Impossible d'ouvrir la vente : ${error.message}`
+        );
+    }
+}
+
+
+// ======================================================
+// CONSTRUIRE LES PRODUITS À MODIFIER
+// ======================================================
+
+function construireProduitsModificationVente(
+    anciennesLignes
+) {
+
+    produitsModificationVente.replaceChildren();
+
+
+    const anciennesVentes = new Map();
+
+    anciennesLignes.forEach(ligne => {
+
+        anciennesVentes.set(
+            ligne.material_bodega_id,
+            ligne
+        );
+
+    });
+
+
+    produitsBodega.forEach(produit => {
+
+        const ancienneVente =
+            anciennesVentes.get(produit.id);
+
+
+        const ancienneQuantite =
+            Number(
+                ancienneVente?.quantite ?? 0
+            );
+
+
+        const stockActuel =
+            Number(
+                produit.cantidad ?? 0
+            );
+
+
+        // Stock actuel + quantité déjà vendue.
+        // Cela permet de corriger une vente à la hausse
+        // tout en respectant le stock disponible.
+
+        const quantiteMaximum =
+            stockActuel + ancienneQuantite;
+
+
+        const ligne =
+            document.createElement("div");
+
+        ligne.className =
+            "ligne-produit-operation";
+
+
+        // INFORMATIONS
+
+        const infos =
+            document.createElement("div");
+
+
+        const nom =
+            document.createElement("strong");
+
+        nom.textContent =
+            produit.nom;
+
+
+        const stock =
+            document.createElement("small");
+
+        stock.textContent =
+            `Stock actuel : ${stockActuel} | Quantité initialement vendue : ${ancienneQuantite}`;
+
+
+        infos.append(
+            nom,
+            stock
+        );
+
+
+        // ZONE DES CHAMPS
+
+        const valeurs =
+            document.createElement("div");
+
+        valeurs.className =
+            "zone-edition-vente";
+
+
+        // PRIX
+
+        const champPrix =
+            document.createElement("div");
+
+        champPrix.className =
+            "champ-edition-vente";
+
+
+        const labelPrix =
+            document.createElement("label");
+
+        labelPrix.textContent =
+            "Prix unitaire (€)";
+
+
+        const prix =
+            document.createElement("input");
+
+        prix.type =
+            "number";
+
+        prix.min =
+            "0";
+
+        prix.step =
+            "0.01";
+
+        prix.value =
+            ancienneVente?.prix_unitaire ??
+            produit.precio_unitario ??
+            "";
+
+        prix.className =
+            "prix-modification-vente";
+
+        prix.dataset.id =
+            produit.id;
+
+
+        champPrix.append(
+            labelPrix,
+            prix
+        );
+
+
+        // QUANTITÉ VENDUE
+
+        const champQuantite =
+            document.createElement("div");
+
+        champQuantite.className =
+            "champ-edition-vente";
+
+
+        const labelQuantite =
+            document.createElement("label");
+
+        labelQuantite.textContent =
+            "Quantité vendue";
+
+
+        const quantite =
+            document.createElement("input");
+
+        quantite.type =
+            "number";
+
+        quantite.min =
+            "0";
+
+        quantite.max =
+            String(quantiteMaximum);
+
+        quantite.step =
+            "1";
+
+        quantite.value =
+            String(ancienneQuantite);
+
+        quantite.className =
+            "quantite-modification-vente";
+
+        quantite.dataset.id =
+            produit.id;
+
+        quantite.dataset.max =
+            String(quantiteMaximum);
+
+
+        champQuantite.append(
+            labelQuantite,
+            quantite
+        );
+
+
+        valeurs.append(
+            champPrix,
+            champQuantite
+        );
+
+
+        ligne.append(
+            infos,
+            valeurs
+        );
+
+
+        produitsModificationVente.appendChild(
+            ligne
+        );
+
+    });
+
+
+    calculerTotalModificationVente();
+}
+
+
+// ======================================================
+// CALCULER LE NOUVEAU TOTAL
+// ======================================================
+
+function calculerTotalModificationVente() {
+
+    let total = 0;
+
+
+    produitsBodega.forEach(produit => {
+
+        const quantiteInput =
+            produitsModificationVente.querySelector(
+                `.quantite-modification-vente[data-id="${produit.id}"]`
+            );
+
+
+        const prixInput =
+            produitsModificationVente.querySelector(
+                `.prix-modification-vente[data-id="${produit.id}"]`
+            );
+
+
+        const quantite =
+            Number(
+                quantiteInput?.value ?? 0
+            );
+
+
+        const prix =
+            Number(
+                prixInput?.value ?? 0
+            );
+
+
+        if (
+            Number.isInteger(quantite) &&
+            quantite > 0 &&
+            Number.isFinite(prix) &&
+            prix >= 0
+        ) {
+
+            total +=
+                quantite * prix;
+
+        }
+
+    });
+
+
+    totalModificationVente.textContent =
+        formaterMonnaie(total);
+}
+
+
+// ======================================================
+// ENREGISTRER LA MODIFICATION
+// ======================================================
+
+async function enregistrerModificationVente(event) {
+
+    event.preventDefault();
+
+    boutonEnregistrerModificationVente.disabled =
+        true;
+
+
+    try {
+
+        const venteId =
+            document.querySelector(
+                "#modifier-vente-id"
+            ).value;
+
+
+        const reference =
+            document.querySelector(
+                "#modifier-reference-vente"
+            ).value.trim();
+
+
+        const dateValeur =
+            document.querySelector(
+                "#modifier-date-vente"
+            ).value;
+
+
+        const notes =
+            document.querySelector(
+                "#modifier-notes-vente"
+            ).value.trim();
+
+
+        if (!reference) {
+            throw new Error(
+                "La référence est obligatoire."
+            );
+        }
+
+
+        if (!dateValeur) {
+            throw new Error(
+                "La date de vente est obligatoire."
+            );
+        }
+
+
+        const dateOperation =
+            new Date(dateValeur);
+
+
+        if (Number.isNaN(dateOperation.getTime())) {
+            throw new Error(
+                "La date de vente est invalide."
+            );
+        }
+
+
+        const lignes = [];
+
+
+        const quantites =
+            Array.from(
+                produitsModificationVente.querySelectorAll(
+                    ".quantite-modification-vente"
+                )
+            );
+
+
+        quantites.forEach(input => {
+
+            const quantite =
+                Number(input.value);
+
+
+            if (
+                !Number.isInteger(quantite) ||
+                quantite < 0
+            ) {
+
+                throw new Error(
+                    "Les quantités doivent être des nombres entiers positifs ou nuls."
+                );
+            }
+
+
+            // Un zéro signifie que le produit
+            // doit être retiré de la vente.
+
+            if (quantite === 0) {
+                return;
+            }
+
+
+            const prixInput =
+                produitsModificationVente.querySelector(
+                    `.prix-modification-vente[data-id="${input.dataset.id}"]`
+                );
+
+
+            if (
+                !prixInput ||
+                prixInput.value.trim() === ""
+            ) {
+
+                throw new Error(
+                    "Un prix doit être renseigné pour chaque produit vendu."
+                );
+            }
+
+
+            const prix =
+                Number(prixInput.value);
+
+
+            if (
+                !Number.isFinite(prix) ||
+                prix < 0
+            ) {
+
+                throw new Error(
+                    "Un prix de vente est invalide."
+                );
+            }
+
+
+            if (
+                quantite >
+                Number(input.dataset.max)
+            ) {
+
+                throw new Error(
+                    "La quantité demandée dépasse le stock disponible pour cette correction."
+                );
+            }
+
+
+            lignes.push({
+
+                material_bodega_id:
+                    input.dataset.id,
+
+                quantite,
+
+                prix_unitaire:
+                    prix
+
+            });
+
+        });
+
+
+        if (lignes.length === 0) {
+
+            throw new Error(
+                "La vente doit contenir au moins un produit."
+            );
+        }
+
+
+        // APPEL SQL
+
+        const {
+            data,
+            error
+        } = await supabase.rpc(
+            "modifier_vente_bodega",
+            {
+
+                p_vente_id:
+                    venteId,
+
+                p_reference:
+                    reference,
+
+                p_date_operation:
+                    dateOperation.toISOString(),
+
+                p_notes:
+                    notes || null,
+
+                p_lignes:
+                    lignes
+
+            }
+        );
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        fermerModificationVente();
+
+
+        await chargerBodega();
+
+
+        await ouvrirFicheVente(
+            venteId
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur modification vente :",
+            error
+        );
+
+
+        afficherMessage(
+            messageModifierVente,
+            error.message,
+            true
+        );
+
+
+    } finally {
+
+        boutonEnregistrerModificationVente.disabled =
+            false;
+
+    }
+
+}
+
+
+// ======================================================
+// FERMER LE FORMULAIRE
+// ======================================================
+
+function fermerModificationVente() {
+
+    formulaireModifierVente.reset();
+
+    produitsModificationVente.replaceChildren();
+
+    messageModifierVente.textContent = "";
+
+    totalModificationVente.textContent =
+        formaterMonnaie(0);
+
+    dialogModifierVente.close();
+
+}
+
+
+// ======================================================
+// CONVERSION DATE / HEURE
+// ======================================================
+
+function convertirDateHeureLocale(valeur) {
+
+    if (!valeur) {
+        return "";
+    }
+
+    const date = new Date(valeur);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const dateLocale = new Date(
+        date.getTime() -
+        date.getTimezoneOffset() * 60000
+    );
+
+    return dateLocale.toISOString().slice(0, 16);
 }
 
 

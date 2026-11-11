@@ -691,6 +691,140 @@
         </form>
 
     </dialog>
+    
+    <!-- =====================================================
+     MODIFIER UNE VENTE
+     ===================================================== -->
+
+    <dialog
+        id="dialog-modifier-vente"
+        class="dialog-bodega"
+    >
+
+        <form
+            id="form-modifier-vente"
+            class="formulaire-bodega"
+        >
+
+            <header class="dialog-bodega-entete">
+
+                <div>
+                    <h2>Modifier la vente</h2>
+                    <p>Corrigez les informations et les produits vendus.</p>
+                </div>
+
+                <button
+                    id="bouton-fermer-modification-vente"
+                    class="bouton-fermer-dialog"
+                    type="button"
+                    aria-label="Fermer"
+                >
+                    ×
+                </button>
+
+            </header>
+
+            <input
+                id="modifier-vente-id"
+                type="hidden"
+            >
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-reference-vente">
+                    Référence
+                </label>
+
+                <input
+                    id="modifier-reference-vente"
+                    type="text"
+                    required
+                >
+
+            </div>
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-date-vente">
+                    Date et heure de la vente
+                </label>
+
+                <input
+                    id="modifier-date-vente"
+                    type="datetime-local"
+                    required
+                >
+
+            </div>
+
+            <section class="section-produits-operation">
+
+                <h3>Produits vendus</h3>
+
+                <p>
+                    Corrigez les quantités réellement vendues.
+                    Mettez 0 pour retirer un produit de cette vente.
+                </p>
+
+                <div
+                    id="produits-modification-vente"
+                    class="liste-produits-operation"
+                ></div>
+
+            </section>
+
+            <div class="resume-vente">
+
+                <span>Nouvelle recette totale</span>
+
+                <strong id="total-modification-vente">
+                    0,00 €
+                </strong>
+
+            </div>
+
+            <div class="champ-formulaire">
+
+                <label for="modifier-notes-vente">
+                    Notes
+                </label>
+
+                <textarea
+                    id="modifier-notes-vente"
+                    rows="3"
+                ></textarea>
+
+            </div>
+
+            <p
+                id="message-modifier-vente"
+                class="message-bodega"
+                role="status"
+            ></p>
+
+            <footer class="actions-dialog">
+
+                <button
+                    id="bouton-annuler-modification-vente"
+                    type="button"
+                    class="bouton-annuler"
+                >
+                    Annuler
+                </button>
+
+                <button
+                    id="bouton-enregistrer-modification-vente"
+                    type="submit"
+                    class="bouton-valider"
+                >
+                    Enregistrer les modifications
+                </button>
+
+            </footer>
+
+        </form>
+
+    </dialog>
 
 
     <!-- =====================================================
